@@ -7,25 +7,78 @@
         gap: 6px;
         align-items: center;
     }
+    .filter-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin: 6px 0;
+    background: #fafafa;
+  }
+
+  .filter-index {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    color: #555;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .and-label {
+    font-size: 12px;
+    color: #777;
+    text-transform: lowercase;
+    margin-right: 4px;
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex: 1;
+  }
+
+  .value-container input,
+  .filter-row select {
+    padding: 4px 6px;
+  }
     </style>
 <head>
   <title>Elastic Search UI</title>
   <script>
+    let filterCount = {{ filters|length }};
    function addFilter() {
-      const div = document.createElement("div");
-      div.className = "filter-row";
-      div.innerHTML = `
-        <select name="field[]" onchange="onFieldChange(this)">
-          {% for f in search_fields %}
-          <option value="{{f}}">{{f}}</option>
-          {% endfor %}
-        </select>
-        <span class="value-container">
-          <input type="text" name="value[]" />
-        </span>
-        <button type="button" onclick="removeFilter(this)">🗑</button>
-      `;
-      document.getElementById("filters").appendChild(div);
+  filterCount += 1;
+
+  const div = document.createElement("div");
+  div.className = "filter-card";
+  div.innerHTML = `
+    ${filterCount > 1 ? `<span class="and-label">and</span>` : `<span class="and-label">___</span>`}
+    <span class="filter-index">${filterCount}</span>
+
+    <div class="filter-row">
+      <select name="field[]" onchange="onFieldChange(this)">
+        {% for f in search_fields %}
+        <option value="{{f}}">{{f}}</option>
+        {% endfor %}
+      </select>
+
+      <span class="value-container">
+        <input type="text" name="value[]" />
+      </span>
+
+      <button type="button" onclick="removeFilter(this)">🗑</button>
+    </div>
+  `;
+
+  document.getElementById("filters").appendChild(div);
 }
 
   function onFieldChange(sel) {
@@ -69,18 +122,23 @@
     function handleMainSearch(e) {
       if (e.key === "Enter") {
         e.preventDefault();
-
+         filterCount += 1;
         const value = e.target.value.trim();
         if (!value) return;
 
         const div = document.createElement("div");
-        div.className = "filter-row";
-        div.innerHTML = `
-          <select name="field[]">
-            <option value="abstract+title" selected>abstract+title</option>
-          </select>
-          <input type="text" name="value[]" value="${value.replace(/"/g, "&quot;")}" />
+        div.className = "filter-card";
+        div.innerHTML = `<span class="and-label">___</span>
+          <span class="filter-index">${filterCount}</span>
+          <div class="filter-row">
+            <select name="field[]">
+              <option value="abstract+title" selected>abstract+title</option>
+            </select>
+             <span class="value-container">
+            <input type="text" name="value[]" value="${value.replace(/"/g, "&quot;")}" />
+              </span>
           <button type="button" onclick="removeFilter(this)">🗑</button>
+          </div>  
         `;
         document.getElementById("filters").appendChild(div);
         e.target.value = "";
@@ -88,8 +146,34 @@
 }
 
  function removeFilter(btn) {
-    const row = btn.closest(".filter-row");
-    if (row) row.remove();
+    const card = btn.closest(".filter-card");
+    if (card) card.remove();
+    filterCount-=1
+    renumberFilters();
+  }
+  function renumberFilters() {
+    const cards = document.querySelectorAll(".filter-card");
+    cards.forEach((c, i) => {
+      const idx = c.querySelector(".filter-index");
+      const andLabel = c.querySelector(".and-label");
+
+      idx.textContent = i + 1;
+          // const s = document.createElement("span");
+          // s.className = "and-label";
+      if (i === 0) {
+        
+          
+          andLabel.textContent = "___";
+          
+      } else {
+        
+         
+          andLabel.textContent = "and";
+         
+        
+      }
+      //c.prepend(s);
+    });
   }
   </script>
 </head>
@@ -112,32 +196,39 @@
 
   <button type="button" onclick="addFilter()">Add filter</button>
 
-  <div id="filters">
+
+<div id="filters">
   {% for f in filters %}
-    <div class="filter-row">
-      <select name="field[]" onchange="onFieldChange(this)">
-        {% for sf in search_fields %}
-          <option value="{{sf}}" {% if sf == f.field %}selected{% endif %}>{{sf}}</option>
-        {% endfor %}
-        <option value="abstract+title" {% if f.field == "abstract+title" %}selected{% endif %}>
-          abstract+title
-        </option>
-      </select>
+    <div class="filter-card">
+      {% if loop.index > 1 %}
+        <span class="and-label">and</span>
+      {% endif %}
+
+      <span class="filter-index">{{ loop.index }}</span>
+
+      <div class="filter-row">
+        <select name="field[]" onchange="onFieldChange(this)">
+          {% for sf in search_fields %}
+            <option value="{{sf}}" {% if sf == f.field %}selected{% endif %}>{{sf}}</option>
+          {% endfor %}
+          <option value="abstract+title" {% if f.field == "abstract+title" %}selected{% endif %}>
+            abstract+title
+          </option>
+        </select>
 
         {% if f.field == "publication_year" %}
-        <span class="value-container">
-            <input type="number" name="year_from[]" value="{{ f.from }}" placeholder="From" style="width:90px" />
-            <input type="number" name="year_to[]" value="{{ f.to }}" placeholder="To" style="width:90px" />
-        </span>
+          <span class="value-container">
+            <input type="number" name="year_from[]" value="{{ f.from }}" placeholder="From" />
+            <input type="number" name="year_to[]" value="{{ f.to }}" placeholder="To" />
+          </span>
         {% else %}
-       
-        
-        <span class="value-container">
+          <span class="value-container">
             <input type="text" name="value[]" value="{{ f.value }}" />
-        </span>
+          </span>
         {% endif %}
 
-      <button type="button" onclick="removeFilter(this)">🗑</button>
+        <button type="button" onclick="removeFilter(this)">🗑</button>
+      </div>
     </div>
   {% endfor %}
 </div>

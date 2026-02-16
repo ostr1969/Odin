@@ -27,11 +27,19 @@ def build_query(q, filters):
 
             if rng:
                 must.append({"range": {"publication_year": rng}})
+        elif field == "ngrams*":
+            must.append({
+                "query_string": {
+                    "query": f["value"],
+                    "fields": ["ngrams*"]
+                }
+            })        
         else:
             if f.get("value"):
                 must.append({"match": {field: f["value"]}})
-
-    return {"query": {"bool": {"must": must}},"size":100}
+    query={"query": {"bool": {"must": must}},"size":100}
+    print(query)
+    return query
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -62,9 +70,10 @@ def home():
                 val = values[v_idx] if v_idx < len(values) else None
                 filters.append({"field": f, "value": val})
                 v_idx += 1
-        print(filters)
+        
         body = build_query(q, filters)
         res = es.search(index=selected_index, body=body)
+        total = res["hits"]["total"]["value"]
         results = [hit["_source"] for hit in res["hits"]["hits"]]
 
     return render_template(
@@ -76,7 +85,8 @@ def home():
         displayed_fields=config.DISPLAYED_FIELDS,
         results=results,
         filters=filters,
-        q=q
+        q=q,
+        total=total
     )
 
 

@@ -1,2 +1,4 @@
-get works3/_search?filter_path=*.*.*.countries
-{"query": {"bool": {"must": [{"match": {"countries": "IL"}}, {"multi_match": {"query": "lazer", "fields": ["abstract", "title"]}}]}}}
+get works3/_search?filter_path=*.*.*.ngram*
+{"query": {"bool": {"must": [{"query_string": 
+        {"query": "lazer", "fields": ["abstract"]}} ,
+        {"match": {"ngram*": "robotics"}}]}}, "size": 100}
