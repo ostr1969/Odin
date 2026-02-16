@@ -7,3 +7,4 @@ SEARCH_FIELDS = ["abstract", "title", "ngrams*","countries", "countries_hist", "
 SMALL_FIELDS = ["language", "type"]
 
 DISPLAYED_FIELDS = ["id", "title", "language", "countries", "countries_hist", "publication_year"]
+CARD_FILTERS = ["topics"]

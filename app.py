@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from elasticsearch import Elasticsearch
-import config
+import config,copy
 
 app = Flask(__name__)
 es = Elasticsearch(config.ELASTIC_URL)
@@ -38,7 +38,7 @@ def build_query(q, filters):
             if f.get("value"):
                 must.append({"match": {field: f["value"]}})
     query={"query": {"bool": {"must": must}},"size":100}
-    print(query)
+    #print(query)
     return query
 
 @app.route("/", methods=["GET", "POST"])
@@ -47,7 +47,8 @@ def home():
     selected_index = None
     q = ""
     filters = []
-
+    total=0
+    topics=[]
     if request.method == "POST":
         selected_index = request.form["index"]
         q = request.form.get("q", "")
@@ -55,7 +56,8 @@ def home():
         fields = request.form.getlist("field[]")
         values = request.form.getlist("value[]")
         years_from = request.form.getlist("year_from[]")
-        years_to = request.form.getlist("year_to[]")    
+        years_to = request.form.getlist("year_to[]")   
+        topic_filters = request.form.getlist("topic[]")  # selected topics 
         
         v_idx = 0
         y_idx = 0
@@ -70,9 +72,28 @@ def home():
                 val = values[v_idx] if v_idx < len(values) else None
                 filters.append({"field": f, "value": val})
                 v_idx += 1
+        #print("topic_filters:",topic_filters)
+        topics_must={"terms": {"topics.id": topic_filters}}
         
         body = build_query(q, filters)
-        res = es.search(index=selected_index, body=body)
+        if len(topic_filters)>0:
+            body["query"]["bool"]["must"].append(topics_must)
+        print(body)
+        res = es.search(
+            index=selected_index,
+            body={
+                **body,
+                "aggs": {
+                    "topics": {
+                        "terms": {
+                            "field": "topics.id",
+                            "size": 10
+                            }
+                    }
+                }
+            }
+        )
+        topics = res["aggregations"]["topics"]["buckets"]
         total = res["hits"]["total"]["value"]
         results = [hit["_source"] for hit in res["hits"]["hits"]]
 
@@ -86,7 +107,8 @@ def home():
         results=results,
         filters=filters,
         q=q,
-        total=total
+        total=total,
+        topics=topics
     )
 
 
