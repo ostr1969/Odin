@@ -13,7 +13,7 @@ def build_query(q, filters):
 
         if field == "abstract+title":
             must.append({
-                "multi_match": {
+                "query_string": {
                     "query": f["value"],
                     "fields": ["abstract", "title"]
                 }

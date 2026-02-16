@@ -12,85 +12,81 @@
   <title>Elastic Search UI</title>
   <script>
    function addFilter() {
-  const div = document.createElement("div");
-  div.className = "filter-row";
-  div.innerHTML = `
-    <select name="field[]" onchange="onFieldChange(this)">
-      {% for f in search_fields %}
-      <option value="{{f}}">{{f}}</option>
-      {% endfor %}
-    </select>
-    <span class="value-container">
-      <input type="text" name="value[]" />
-    </span>
-    <button type="button" onclick="removeFilter(this)">🗑</button>
-  `;
-  document.getElementById("filters").appendChild(div);
+      const div = document.createElement("div");
+      div.className = "filter-row";
+      div.innerHTML = `
+        <select name="field[]" onchange="onFieldChange(this)">
+          {% for f in search_fields %}
+          <option value="{{f}}">{{f}}</option>
+          {% endfor %}
+        </select>
+        <span class="value-container">
+          <input type="text" name="value[]" />
+        </span>
+        <button type="button" onclick="removeFilter(this)">🗑</button>
+      `;
+      document.getElementById("filters").appendChild(div);
 }
 
   function onFieldChange(sel) {
-    const field = sel.value;
-    const row = sel.closest(".filter-row");
-    const container = row.querySelector(".value-container");
-    const index = document.getElementById("index").value;
-    const smallFields = {{ small_fields|tojson }};
+      const field = sel.value;
+      const row = sel.closest(".filter-row");
+      const container = row.querySelector(".value-container");
+      const index = document.getElementById("index").value;
+      const smallFields = {{ small_fields|tojson }};
 
-    // publication_year => range inputs
-    if (field === "publication_year") {
-      container.innerHTML = `
-        <input type="number" name="year_from[]" placeholder="From" style="width:90px" />
-        <input type="number" name="year_to[]" placeholder="To" style="width:90px" />
-      `;
-      return;
-    }
+      // publication_year => range inputs
+      if (field === "publication_year") {
+          container.innerHTML = `
+            <input type="number" name="year_from[]" placeholder="From" style="width:90px" />
+            <input type="number" name="year_to[]" placeholder="To" style="width:90px" />
+          `;
+          return;
+      }
 
-    // small_fields => aggregation dropdown
-    if (smallFields.includes(field)) {
-      fetch(`/aggregations/${index}/${field}`)
-        .then(r => r.json())
-        .then(data => {
-          const select = document.createElement("select");
-          select.name = "value[]";
-          data.forEach(v => {
-            const o = document.createElement("option");
-            o.value = v;
-            o.text = v;
-            select.appendChild(o);
+      // small_fields => aggregation dropdown
+      if (smallFields.includes(field)) {
+        fetch(`/aggregations/${index}/${field}`)
+          .then(r => r.json())
+          .then(data => {
+              const select = document.createElement("select");
+              select.name = "value[]";
+              data.forEach(v => {
+                const o = document.createElement("option");
+                o.value = v;
+                o.text = v;
+                select.appendChild(o);
+              });
+              container.innerHTML = "";
+              container.appendChild(select);
           });
-          container.innerHTML = "";
-          container.appendChild(select);
-        });
-      return;
-    }
+        return;
+      }
 
-    // default => text input
-    container.innerHTML = `<input type="text" name="value[]" />`;
+      // default => text input
+      container.innerHTML = `<input type="text" name="value[]" />`;
   }
     function handleMainSearch(e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
+      if (e.key === "Enter") {
+        e.preventDefault();
 
-    const value = e.target.value.trim();
-    if (!value) return;
+        const value = e.target.value.trim();
+        if (!value) return;
 
-    const div = document.createElement("div");
-    div.className = "filter-row";
-    div.innerHTML = `
-      <select name="field[]">
-        <option value="abstract+title" selected>abstract+title</option>
-      </select>
-      <input type="text" name="value[]" value="${value.replace(/"/g, "&quot;")}" />
-      <button type="button" onclick="removeFilter(this)">🗑</button>
-    `;
-    document.getElementById("filters").appendChild(div);
-    e.target.value = "";
-  }
+        const div = document.createElement("div");
+        div.className = "filter-row";
+        div.innerHTML = `
+          <select name="field[]">
+            <option value="abstract+title" selected>abstract+title</option>
+          </select>
+          <input type="text" name="value[]" value="${value.replace(/"/g, "&quot;")}" />
+          <button type="button" onclick="removeFilter(this)">🗑</button>
+        `;
+        document.getElementById("filters").appendChild(div);
+        e.target.value = "";
+      }
 }
-  window.onload = () => {
-  document.querySelectorAll("select[name='field[]']").forEach(sel => {
-    onFieldChange(sel);
-  });
-};
+
  function removeFilter(btn) {
     const row = btn.closest(".filter-row");
     if (row) row.remove();
@@ -134,6 +130,8 @@
             <input type="number" name="year_to[]" value="{{ f.to }}" placeholder="To" style="width:90px" />
         </span>
         {% else %}
+       
+        
         <span class="value-container">
             <input type="text" name="value[]" value="{{ f.value }}" />
         </span>
