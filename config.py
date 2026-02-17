@@ -1,3 +1,4 @@
+from elasticsearch import Elasticsearch
 ELASTIC_URL = "http://localhost:9200"
 
 INDEXES = ["works3", "authors"]
@@ -8,3 +9,4 @@ SMALL_FIELDS = ["language", "type"]
 
 DISPLAYED_FIELDS = ["id", "title", "language", "countries", "countries_hist", "publication_year"]
 CARD_FILTERS = ["topics"]
+es = Elasticsearch(ELASTIC_URL)

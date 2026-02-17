@@ -135,6 +135,12 @@
     padding: 4px 8px;
     font-size: 12px;
   }
+  .truncate {
+  width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
     </style>
 <head>
   <title>Elastic Search UI</title>
@@ -288,6 +294,8 @@
     <div class="filter-card">
       {% if loop.index > 1 %}
         <span class="and-label">and</span>
+      {% else %}  
+        <span class="and-label">___</span>
       {% endif %}
 
       <span class="filter-index">{{ loop.index }}</span>
@@ -338,11 +346,11 @@
   <h3>Topic</h3>
 
   <div class="topic-list">
-    {% for t in topics %}
+    {% for t,v in topics.items() %}
       <label class="topic-item">
-        <input type="checkbox" name="topic[]" value="{{ t.key }}" />
-        <span class="topic-name">{{ t.key }}</span>
-        <span class="topic-count">{{ t.doc_count }}</span>
+        <input type="checkbox" name="topic[]" value="{{ t }}" />
+        <span class="topic-name">{{ v[0] }}</span>
+        <span class="topic-count">{{ v[1] }}</span>
       </label>
     {% endfor %}
   </div>
@@ -367,7 +375,11 @@
           {% for r in results %}
             <tr>
               {% for f in displayed_fields %}
-                <td>{{ r.get(f, "") }}</td>
+                {% if f=="countries_hist" %}
+                <td ><div class="truncate" title="{{ r.get(f, "") }}">{{ r.get(f, "") }}</div></td>
+                {% else %}
+                 <td>{{ r.get(f, "") }}</td>
+                {% endif %}
               {% endfor %}
             </tr>
           {% endfor %}

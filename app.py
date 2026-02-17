@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify
-from elasticsearch import Elasticsearch
-import config,copy
 
+import config,copy
+from config import es
+from utils import get_topics_dn
 app = Flask(__name__)
-es = Elasticsearch(config.ELASTIC_URL)
+
 
 def build_query(q, filters):
     must = []
@@ -78,7 +79,7 @@ def home():
         body = build_query(q, filters)
         if len(topic_filters)>0:
             body["query"]["bool"]["must"].append(topics_must)
-        print(body)
+        
         res = es.search(
             index=selected_index,
             body={
@@ -94,9 +95,10 @@ def home():
             }
         )
         topics = res["aggregations"]["topics"]["buckets"]
+        #print(topics)
         total = res["hits"]["total"]["value"]
         results = [hit["_source"] for hit in res["hits"]["hits"]]
-
+        topics=get_topics_dn(topics,index=selected_index)
     return render_template(
         "index.html",
         indexes=config.INDEXES,
