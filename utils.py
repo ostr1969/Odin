@@ -19,6 +19,13 @@ def get_topics_dn(ids_dict:dict,index:str):
         for t in resp["hits"]["hits"][0]["_source"]["topics"]:
            if t["id"] in topdict:
                 resd[t["id"]]=(t["display_name"],topdict[t["id"]]) 
-    #print(resd)
-    
     return resd
+def check_es_alive():
+    res=es.ping()
+    if res:
+        print("Connected to Elasticsearch")
+        return True
+    else:
+        print("Failed to connect to Elasticsearch")
+        return False
+    

@@ -140,81 +140,211 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
+  }
+  .home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    margin-left: 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #4f46e5, #2563eb);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  }
+
+  .home-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    filter: brightness(1.05);
+  }
+
+  .home-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #0f172a; /* dark slate */
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  }
+
+  /* Select */
+  .fancy-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    padding: 8px 44px 8px 12px;  /* extra right padding for arrow */
+    min-width: 80px;          /* prevent ultra-narrow selects */
+
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #020617;
+    color: #e5e7eb;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+
+    background-image:
+      linear-gradient(45deg, transparent 50%, #94a3b8 50%),
+      linear-gradient(135deg, #94a3b8 50%, transparent 50%);
+    background-position:
+      right 18px center,
+      right 12px center;
+    background-size: 6px 6px;
+    background-repeat: no-repeat;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .fancy-select:hover {
+    border-color: #6366f1;
+  }
+
+  .fancy-select:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.3);
+  }
+
+  /* Input */
+  .fancy-input {
+    padding: 8px 12px;
+    min-width: 220px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #f9f9fa;
+    color: #000000;
+    outline: none;
+  }
+
+  .fancy-input::placeholder {
+    color: #64748b;
+  }
+
+  .fancy-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.3);
+  }
+
+  /* Add filter button */
+  .fancy-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    color: #0f172a;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+  }
+
+  .fancy-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+
+  .fancy-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  }
+  .id-link {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .id-link:hover {
+    text-decoration: underline;
+  }
+
     </style>
 <head>
   <title>Elastic Search UI</title>
   <script>
     let filterCount = {{ filters|length }};
-   function addFilter() {
-  filterCount += 1;
+    function addFilter() {
+      filterCount += 1;
 
-  const div = document.createElement("div");
-  div.className = "filter-card";
-  div.innerHTML = `
-    ${filterCount > 1 ? `<span class="and-label">and</span>` : `<span class="and-label">___</span>`}
-    <span class="filter-index">${filterCount}</span>
+      const div = document.createElement("div");
+      div.className = "filter-card";
+      div.innerHTML = `
+        ${filterCount > 1 ? `<span class="and-label">and</span>` : `<span class="and-label">___</span>`}
+        <span class="filter-index">${filterCount}</span>
 
-    <div class="filter-row">
-      <select name="field[]" onchange="onFieldChange(this)">
-        {% for f in search_fields %}
-        <option value="{{f}}">{{f}}</option>
-        {% endfor %}
-      </select>
+        <div class="filter-row">
+          <select name="field[]" class="fancy-select" onchange="onFieldChange(this)">
+            {% for f in search_fields %}
+            <option value="{{f}}">{{f}}</option>
+            {% endfor %}
+          </select>
 
-      <span class="value-container">
-        <input type="text" name="value[]" />
-      </span>
+          <span class="value-container">
+            <input type="text" name="value[]" class="fancy-input" />
+          </span>
 
-      <button type="button" onclick="removeFilter(this)">🗑</button>
-    </div>
-  `;
+          <button type="button" onclick="removeFilter(this)">🗑</button>
+        </div>
+      `;
 
-  document.getElementById("filters").appendChild(div);
-}
+      document.getElementById("filters").appendChild(div);
+    }
 
-  function onFieldChange(sel) {
-      const field = sel.value;
-      const row = sel.closest(".filter-row");
-      const container = row.querySelector(".value-container");
-      const index = document.getElementById("index").value;
-      const smallFields = {{ small_fields|tojson }};
+    function onFieldChange(sel) {
+        const field = sel.value;
+        const row = sel.closest(".filter-row");
+        const container = row.querySelector(".value-container");
+        const index = document.getElementById("index").value;
+        const smallFields = {{ small_fields|tojson }};
 
-      // publication_year => range inputs
-      if (field === "publication_year") {
-          container.innerHTML = `
-            <input type="number" name="year_from[]" placeholder="From" style="width:90px" />
-            <input type="number" name="year_to[]" placeholder="To" style="width:90px" />
-          `;
+        // publication_year => range inputs
+        if (field === "publication_year") {
+            container.innerHTML = `
+              <input type="number" name="year_from[]" placeholder="From" style="width:90px" />
+              <input type="number" name="year_to[]" placeholder="To" style="width:90px" />
+            `;
+            return;
+        }
+
+        // small_fields => aggregation dropdown
+        if (smallFields.includes(field)) {
+          fetch(`/aggregations/${index}/${field}`)
+            .then(r => r.json())
+            .then(data => {
+                const select = document.createElement("select");
+                select.name = "value[]";
+                select.className = "fancy-select";
+                data.forEach(v => {
+                  const o = document.createElement("option");
+                  o.value = v;
+                  o.text = v;
+                  select.appendChild(o);
+                });
+                container.innerHTML = "";
+                container.appendChild(select);
+            });
           return;
-      }
+        }
 
-      // small_fields => aggregation dropdown
-      if (smallFields.includes(field)) {
-        fetch(`/aggregations/${index}/${field}`)
-          .then(r => r.json())
-          .then(data => {
-              const select = document.createElement("select");
-              select.name = "value[]";
-              data.forEach(v => {
-                const o = document.createElement("option");
-                o.value = v;
-                o.text = v;
-                select.appendChild(o);
-              });
-              container.innerHTML = "";
-              container.appendChild(select);
-          });
-        return;
-      }
-
-      // default => text input
-      container.innerHTML = `<input type="text" name="value[]" />`;
-  }
+        // default => text input
+        container.innerHTML = `<input type="text" name="value[]" class="fancy-input" />`;
+    }
     function handleMainSearch(e) {
       if (e.key === "Enter") {
+        // convert main query text into a filter instead of letting the form submit
         e.preventDefault();
-         filterCount += 1;
+        filterCount += 1;
         const value = e.target.value.trim();
         if (!value) return;
 
@@ -223,171 +353,186 @@
         div.innerHTML = `<span class="and-label">___</span>
           <span class="filter-index">${filterCount}</span>
           <div class="filter-row">
-            <select name="field[]">
+            <select name="field[]" class="fancy-select">
               <option value="abstract+title" selected>abstract+title</option>
             </select>
-             <span class="value-container">
-            <input type="text" name="value[]" value="${value.replace(/"/g, "&quot;")}" />
+            <span class="value-container">
+            <input type="text" name="value[]" class="fancy-input" value="${value.replace(/"/g, "&quot;")}" />
               </span>
           <button type="button" onclick="removeFilter(this)">🗑</button>
           </div>  
         `;
         document.getElementById("filters").appendChild(div);
         e.target.value = "";
-      }
-}
 
- function removeFilter(btn) {
-    const card = btn.closest(".filter-card");
-    if (card) card.remove();
-    filterCount-=1
-    renumberFilters();
-  }
-  function renumberFilters() {
-    const cards = document.querySelectorAll(".filter-card");
-    cards.forEach((c, i) => {
-      const idx = c.querySelector(".filter-index");
-      const andLabel = c.querySelector(".and-label");
-
-      idx.textContent = i + 1;
-          // const s = document.createElement("span");
-          // s.className = "and-label";
-      if (i === 0) {
-        
-          
-          andLabel.textContent = "___";
-          
-      } else {
-        
-         
-          andLabel.textContent = "and";
-         
-        
+        // after dom update submit the form so request.form contains fields
+        //e.target.form.submit();
       }
-      //c.prepend(s);
-    });
-  }
+    }
+
+    function removeFilter(btn) {
+      const card = btn.closest(".filter-card");
+      if (card) card.remove();
+      filterCount-=1
+      renumberFilters();
+    }
+    function renumberFilters() {
+      const cards = document.querySelectorAll(".filter-card");
+      cards.forEach((c, i) => {
+        const idx = c.querySelector(".filter-index");
+        const andLabel = c.querySelector(".and-label");
+
+        idx.textContent = i + 1;
+            // const s = document.createElement("span");
+            // s.className = "and-label";
+        if (i === 0) {
+          
+            
+            andLabel.textContent = "___";
+            
+        } else {
+          
+          
+            andLabel.textContent = "and";
+          
+          
+        }
+        //c.prepend(s);
+      });
+    }
   </script>
 </head>
 <body>
-<form method="POST">
- <select name="index" id="index">
-  {% for i in indexes %}
-    <option value="{{i}}" {% if i == selected_index %}selected{% endif %}>{{i}}</option>
-  {% endfor %}
-</select>
+  <form method="POST">
+      <a href="{{ url_for('home') }}" class="home-btn" title="Reset & start over">
+        ⌂ Home
+      </a>
+      <select name="index" class="fancy-select" id="index">
+        {% for i in indexes %}
+          <option value="{{i}}" {% if i == selected_index %}selected{% endif %}>{{i}}</option>
+        {% endfor %}
+      </select>
 
-  <input
-  type="text"
-  id="mainSearch"
-  name="q"
-  placeholder="Search..."
-  value="{{ q }}"
-  onkeydown="handleMainSearch(event)"
-/>
+      <input
+        type="text"
+        id="mainSearch"
+        name="q"
+        class="fancy-input"
+        placeholder="Search..."
+        value="{{ q }}"
+        onkeydown="handleMainSearch(event)"
+      />
 
-  <button type="button" onclick="addFilter()">Add filter</button>
+      <button type="button" class="fancy-btn" onclick="addFilter()">Add filter</button>
 
 
-<div id="filters">
-  {% for f in filters %}
-    <div class="filter-card">
-      {% if loop.index > 1 %}
-        <span class="and-label">and</span>
-      {% else %}  
-        <span class="and-label">___</span>
-      {% endif %}
+      <div id="filters">
+        {% for f in filters %}
+          <div class="filter-card">
+            {% if loop.index > 1 %}
+              <span class="and-label">and</span>
+            {% else %}  
+              <span class="and-label">___</span>
+            {% endif %}
 
-      <span class="filter-index">{{ loop.index }}</span>
+            <span class="filter-index">{{ loop.index }}</span>
 
-      <div class="filter-row">
-        <select name="field[]" onchange="onFieldChange(this)">
-          {% for sf in search_fields %}
-            <option value="{{sf}}" {% if sf == f.field %}selected{% endif %}>{{sf}}</option>
+            <div class="filter-row">
+              <select name="field[]" class="fancy-select" onchange="onFieldChange(this)">
+                {% for sf in search_fields %}
+                  <option value="{{sf}}" {% if sf == f.field %}selected{% endif %}>{{sf}}</option>
+                {% endfor %}
+                <option value="abstract+title" {% if f.field == "abstract+title" %}selected{% endif %}>
+                  abstract+title
+                </option>
+              </select>
+
+              {% if f.field == "publication_year" %}
+                <span class="value-container">
+                  <input type="number" name="year_from[]" value="{{ f.from }}" placeholder="From" />
+                  <input type="number" name="year_to[]" value="{{ f.to }}" placeholder="To" />
+                </span>
+              {% else %}
+                <span class="value-container">
+                  <input type="text" name="value[]" class="fancy-input" value="{{ f.value }}" />
+                </span>
+              {% endif %}
+
+              <button type="button" onclick="removeFilter(this)">🗑</button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div style="margin-top: 10px;">
+         <button class="fancy-btn" type="submit">Search</button>
+      </div>
+
+  <hr/>
+
+      <div class="page-layout">
+        <!-- Left: Stats -->
+        <div class="left-panel">
+          <h3>Stats</h3>
+          <div class="card">
+          
+            <div class="stat-item">
+              <div class="stat-label">Total results</div>
+              <div class="stat-value">{{ total }}</div>
+            </div>
+          </div>
+          <div class="card">
+        <h3>Topic</h3>
+
+        <div class="topic-list">
+          {% for t,v in topics.items() %}
+            <label class="topic-item">
+              <input type="checkbox" name="topic[]" value="{{ t }}" />
+              <span class="topic-name">{{ v[0] }}</span>
+              <span class="topic-count">{{ v[1] }}</span>
+            </label>
           {% endfor %}
-          <option value="abstract+title" {% if f.field == "abstract+title" %}selected{% endif %}>
-            abstract+title
-          </option>
-        </select>
+        </div>
 
-        {% if f.field == "publication_year" %}
-          <span class="value-container">
-            <input type="number" name="year_from[]" value="{{ f.from }}" placeholder="From" />
-            <input type="number" name="year_to[]" value="{{ f.to }}" placeholder="To" />
-          </span>
-        {% else %}
-          <span class="value-container">
-            <input type="text" name="value[]" value="{{ f.value }}" />
-          </span>
-        {% endif %}
-
-        <button type="button" onclick="removeFilter(this)">🗑</button>
+        <button type="submit" class="apply-topics">Apply topics</button>
       </div>
     </div>
-  {% endfor %}
-</div>
-  <button type="submit">Search</button>
 
+      <!-- Right: Results -->
+      <div class="right-panel">
+        <div class="card">
+          <h3>Results</h3>
+          <table class="results-table">
+            <thead>
+              <tr>
+                {% for f in displayed_fields %}
+                  <th>{{ f }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in results %}
+                <tr>
+                  {% for f in displayed_fields %}
+                    {% if f=="countries_hist" %}
+                    <td ><div class="truncate" title="{{ r.get(f, "") }}">{{ r.get(f, "") }}</div></td>
+                    {% elif f == "id" %}                  
+                    <td>
+                      <a href="{{ r.get(f) }}" class="id-link" target="_blank" rel="noopener">
+                        {{ r.get(f) }}
+                      </a>
+                    </td>
 
-<hr/>
-
-<div class="page-layout">
-  <!-- Left: Stats -->
-  <div class="left-panel">
-     <h3>Stats</h3>
-    <div class="card">
-     
-      <div class="stat-item">
-        <div class="stat-label">Total results</div>
-        <div class="stat-value">{{ total }}</div>
-      </div>
-    </div>
-    <div class="card">
-  <h3>Topic</h3>
-
-  <div class="topic-list">
-    {% for t,v in topics.items() %}
-      <label class="topic-item">
-        <input type="checkbox" name="topic[]" value="{{ t }}" />
-        <span class="topic-name">{{ v[0] }}</span>
-        <span class="topic-count">{{ v[1] }}</span>
-      </label>
-    {% endfor %}
-  </div>
-
-  <button type="submit" class="apply-topics">Apply topics</button>
-</div>
-  </div>
-
-  <!-- Right: Results -->
-  <div class="right-panel">
-    <div class="card">
-      <h3>Results</h3>
-      <table class="results-table">
-        <thead>
-          <tr>
-            {% for f in displayed_fields %}
-              <th>{{ f }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in results %}
-            <tr>
-              {% for f in displayed_fields %}
-                {% if f=="countries_hist" %}
-                <td ><div class="truncate" title="{{ r.get(f, "") }}">{{ r.get(f, "") }}</div></td>
-                {% else %}
-                 <td>{{ r.get(f, "") }}</td>
-                {% endif %}
+                    {% else %}
+                    <td>{{ r.get(f, "") }}</td>
+                    {% endif %}
+                  {% endfor %}
+                </tr>
               {% endfor %}
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-</form>
+  </form>
 </body>
 </html>

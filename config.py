@@ -1,4 +1,6 @@
 from elasticsearch import Elasticsearch
+
+
 ELASTIC_URL = "http://localhost:9200"
 
 INDEXES = ["works3", "authors"]
