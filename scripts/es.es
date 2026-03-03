@@ -23,3 +23,7 @@ POST works3/_update_by_query
     "lang": "painless"
   }
 }
+get libgen/_search?filter_path=agg*
+{"size": 100, "aggs": {"values": {"terms": {"field": "Extension.keyword", "size": 50}}}}
+get libgen/_search
+{"size": 100, "query": {"bool": {"must": [{"term": {"Extension.keyword": "docx"}}]}}}

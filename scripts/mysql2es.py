@@ -26,7 +26,7 @@ def generate_batches():
         for row in rows:
             actions.append({
                 "_index": "libgen",
-                "_id": row["ID"],
+                "_id": str(row["ID"])+"_"+row["MD5"],
                 "_source": row
             })
 
