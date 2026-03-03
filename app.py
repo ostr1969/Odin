@@ -144,9 +144,11 @@ def aggs(index, field):
             }
         }
     }
+    
     res = es.search(index=index, body=body)
     buckets = res["aggregations"]["values"]["buckets"]
-    return jsonify([b["key"] for b in buckets])
+    print("Aggregation:", buckets)
+    return jsonify([b["key_as_string"] for b in buckets])
 
 if __name__ == "__main__":
     check_es_alive()
