@@ -1,6 +1,6 @@
 import mysql.connector
 from elasticsearch import Elasticsearch, helpers
-
+#read row from mysql of libgen data and find extension by hash, than ingset to ES the row metadata
 BATCH_SIZE = 2000
 
 # MySQL connection (server-side cursor)
@@ -26,7 +26,7 @@ def generate_batches():
         for row in rows:
             actions.append({
                 "_index": "libgen",
-                "_id": str(row["ID"])+"_"+row["MD5"],
+                "_id": row["MD5"],
                 "_source": row
             })
 

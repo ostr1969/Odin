@@ -12,6 +12,13 @@ services:
       - "3306:3306"
     volumes:
       -  /home/DATA/openAlexData/libgen:/var/lib/mysql
-
+  tika:
+    image: tika:djvu
+    container_name: tika
+    ports:
+      - "9998:9998"
+    environment:
+      JaVA_OPTS: "-Xms1g -Xmx2g"  
+    restart: unless-stopped
 volumes:
   mysql_data:
