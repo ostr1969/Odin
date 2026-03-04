@@ -1,17 +1,40 @@
 import os
+import shutil
 import subprocess
 import tempfile
-import zipfile
+import zipfile,mobi,html2text
 # This script processes zip files in the specified folder, extracts text content from supported file types (PDF, DOC, DOCX) using Apache Tika, and updates the corresponding documents in Elasticsearch with the extracted content.
 from elasticsearch import Elasticsearch, helpers
 import requests
+HOST="172.17.0.1"
 ES_INDEX = "libgen"
 TIKA_URL = "http://localhost:9998/tika"
 
-es = Elasticsearch("http://localhost:9200")
+es = Elasticsearch(f"http://{HOST}:9200")
 ZIP_FOLDER = "../Samples"
 BATCH_SIZE = 500
 actions = []
+def mobi_to_text(mobi_filepath):
+    # 1. Extract the content from the MOBI file
+    # mobi.extract creates a temporary directory and returns paths to the dir and the extracted file
+    tempdir, filepath = mobi.extract(mobi_filepath)
+    
+    try:
+        # 2. Read the extracted file content (usually HTML)
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        # 3. Convert the HTML content to plain text
+        # The html2text library handles the conversion from HTML to a readable text format
+        text_content = html2text.html2text(content)
+        
+        return text_content
+
+    finally:
+        # 4. Clean up the temporary directory created by mobi.extract
+        if tempdir and os.path.exists(tempdir):
+            shutil.rmtree(tempdir)
+
 def extract_djvu_text(filepath):
     try:
         result = subprocess.run(
@@ -54,7 +77,7 @@ for zip_name in os.listdir(ZIP_FOLDER):
                 print(f"Document with ID {file_hash} not found in ES. Skipping.")
                 continue
 
-            if ext not in ["pdf", "doc", "docx","djvu","epub"]:
+            if ext not in ["pdf", "doc", "docx","djvu","epub","mobi"]:
                 continue
 
             # Extract to temp
@@ -66,6 +89,8 @@ for zip_name in os.listdir(ZIP_FOLDER):
                 #print(f"Extracting {file_hash} with extension {ext}...")
                 if ext == "djvu":
                     text = extract_djvu_text(tmp_path)
+                elif ext == "mobi":
+                    text = mobi_to_text(tmp_path)
                 else:
                     text = extract_with_tika(tmp_path)
                 #print(text[:100])  # Print first 100 chars for verification

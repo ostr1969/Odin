@@ -24,6 +24,38 @@ POST works3/_update_by_query
   }
 }
 get libgen/_search?filter_path=agg*
-{"size": 100, "aggs": {"values": {"terms": {"field": "Extension.keyword", "size": 50}}}}
+{
+    "size": 100,
+    "aggs": {
+        "values": {
+            "terms": {
+                "field": "Extension.keyword",
+                "size": 50
+            }
+        }
+    }
+}
 get libgen/_search
-{"size": 100, "query": {"bool": {"must": [{"term": {"Extension.keyword": "epub"}}]}}}
+{
+    "size": 100,
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "term": {
+                        "Extension.keyword": "mobi"
+                    }
+                }
+            ]
+        }
+    }
+}
+get libgen/_search
+{"query": {"query_string": {"query": "Alice in Wonderland", "fields": ["content"]}}}
+
+POST libgen/_update/874611_d5c5af05d51c83da3a4cb833d5e830f7
+{
+  "doc": {
+    "content": "Alice in Wonderland "
+  }
+}
