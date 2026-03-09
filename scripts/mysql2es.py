@@ -1,11 +1,12 @@
 import mysql.connector
 from elasticsearch import Elasticsearch, helpers
+from __init__ import es,HOST
 #read row from mysql of libgen data and find extension by hash, than ingset to ES the row metadata
 BATCH_SIZE = 2000
 
 # MySQL connection (server-side cursor)
 conn = mysql.connector.connect(
-    host="127.0.0.1",
+    host=HOST,
     user="mysql",
     password="rgb098",
     database="libgen"
@@ -14,7 +15,7 @@ conn = mysql.connector.connect(
 cursor = conn.cursor(dictionary=True)
 cursor.execute("SELECT * FROM updated")
 
-es = Elasticsearch("http://localhost:9200")
+#es = Elasticsearch("http://localhost:9200")
 
 def generate_batches():
     while True:

@@ -13,6 +13,7 @@ services:
     volumes:
       -  /home/DATA/openAlexData/libgen:/var/lib/mysql
   tika:
+    profiles: ["old"] 
     image: tika:djvu
     container_name: tika
     ports:

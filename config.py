@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 
 
-ELASTIC_URL = "http://localhost:9200"
+ELASTIC_URL = "http://172.17.0.1:9200"
 
 INDEXES = ["works3", "authors"]
 

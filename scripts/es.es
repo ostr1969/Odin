@@ -23,13 +23,13 @@ POST works3/_update_by_query
     "lang": "painless"
   }
 }
-get libgen/_search?filter_path=agg*
+get works3/_search?filter_path=agg*
 {
     "size": 100,
     "aggs": {
         "values": {
             "terms": {
-                "field": "Extension.keyword",
+                "field": "type",
                 "size": 50
             }
         }
@@ -50,12 +50,116 @@ get libgen/_search
         }
     }
 }
-get libgen/_search
-{"query": {"query_string": {"query": "Alice in Wonderland", "fields": ["content"]}}}
+get works3/_search?filter_path=*.*.*.title,*.*.*.publ*
+{
+    "query": {
+        "query_string": {
+            "query": "Poucher"s Perfumes, Cosmetics and Soaps",
+            "fields": [
+                "title"
+            ],
+            "fuzziness": "AUTO",
+        "minimum_should_match": "70%"
+        }
+    }
+}
+
+get libgen/_search?filter_path=*.*.*.Title,*.*.*.publ*
+{
+    "query": {
+        "match": {
+            "Title": "magnetic"
+        }
+    }
+}
 
 POST libgen/_update/874611_d5c5af05d51c83da3a4cb833d5e830f7
 {
   "doc": {
     "content": "Alice in Wonderland "
   }
+}
+get works3/_search?filter_path=*.*.*.title,*.*._score,*.*._explanation&search_type=dfs_query_then_fetch
+{
+    "size": 2,
+    "explain": true,
+    "query": {
+        "function_score": {
+            "query": {
+                "bool": {
+                    "filter": [
+                        {
+                            "term": {
+                                "language": "en"
+                            }
+                        }
+                    ],
+                    "must_not": [
+                        {
+                            "term": {
+                                "type": "article"
+                            }
+                        }
+                    ],
+                    "should": [
+                        {
+                            "match_phrase": {
+                                "title": {
+                                    "query": "Neuroscience",
+                                    "slop": 2,
+                                    "boost": 5
+                                }
+                            }
+                        },
+                        {
+                            "match": {
+                                "title": {
+                                    "query": "Neuroscience",
+                                    "operator": "and",
+                                    "boost": 2
+                                }
+                            }
+                        },
+                        {
+                            "match": {
+                                "title": {
+                                    "query": "Neuroscience",
+                                    "fuzziness": "AUTO",
+                                    "minimum_should_match": "70%",
+                                    "boost": 1
+                                }
+                            }
+                        }
+                    ],
+                    "minimum_should_match": 1
+                }
+            },
+            "boost_mode": "multiply",
+            "score_mode": "multiply",
+            "functions": [
+                {
+                    "gauss": {
+                        "publication_year": {
+                            "origin": "2004",
+                            "scale": 1,
+                            "offset": 0,
+                            "decay": 0.8
+                        }
+                    }
+                },
+                {
+          "filter": {
+            "bool": {
+              "must_not": {
+                "exists": {
+                  "field": "publication_year"
+                }
+              }
+            }
+          },
+          "weight": 0.9
+        }
+            ]
+        }
+    }
 }
