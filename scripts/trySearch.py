@@ -1,5 +1,10 @@
 from elasticsearch import Elasticsearch
+from difflib import SequenceMatcher
+from rapidfuzz import fuzz
+#matching title from libjen mysql db to openalex so that 
+# we can use hushinjest to insert text and attach the pdf
 HOST="172.17.0.1"
+
 es = Elasticsearch(f"http://{HOST}:9200")
 def semSearch(query):
   model=None
@@ -40,7 +45,7 @@ def semSearch(query):
 def closestTitle(query,year,lang):
     #print(f"Searching for {query} ({year}, {lang})")
     body={
-    "size":3,
+    "size":1,
     "query": {
       "function_score": {
         "query": {
@@ -54,7 +59,7 @@ def closestTitle(query,year,lang):
             ],
             "must_not":[{
                 "term": {
-                  "type": "article"
+                  "type": "article1"
                 }
               }],
             "should": [
@@ -75,8 +80,18 @@ def closestTitle(query,year,lang):
                     "boost": 2
                   }
                 }
-              },
-              {
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        },       
+        "boost_mode": "multiply",
+        "score_mode": "multiply"
+      }
+    }
+  }  
+    
+    fuz=         {
                 "match": {
                   "title": {
                     "query": query,
@@ -86,16 +101,6 @@ def closestTitle(query,year,lang):
                   }
                 }
               }
-            ],
-            "minimum_should_match": 1
-          }
-        },
-       
-        "boost_mode": "multiply",
-        "score_mode": "multiply"
-      }
-    }
-  }  
     #year=0  
     if year!=0:
       body["query"]["function_score"]["functions"] =  [
@@ -108,7 +113,8 @@ def closestTitle(query,year,lang):
                 "decay": 0.8,
                 
               }
-            }
+            },
+            "weight": 1
           },
           {
           "filter": {
@@ -124,24 +130,31 @@ def closestTitle(query,year,lang):
         }
         ]
       
-    #print(body)  
+    #print(body) 
+    
     res = es.search(index="works3", body=body)  
     if len(res["hits"]["hits"])==0:
         print("---None---")
+        
         return
     for hit in res["hits"]["hits"]:
-      
-      print(f"OA:{hit["_source"].get("publication_year","")}:{hit["_score"]}:{hit["_source"]["title"]} ({hit["_source"]["type"]})")
+      #ratio=SequenceMatcher(None, query, hit["_source"]["title"]).ratio()
+      ratio=fuzz.ratio(query, hit["_source"]["title"])/100
+      print(f"OA:{hit["_source"].get("publication_year","")}:{hit["_source"]["title"]} ({hit["_source"]["type"]},{ratio:.2f})")
+      #print(f"OA:{hit["_source"].get("publication_year","")}:{hit["_score"]}:{hit["_source"]["title"]} ({hit["_source"]["type"]})")
     print("-----")
     
 if __name__ == "__main__":
     # semSearch(query)
-    response=es.search(index="libgen", query= {"match": {"Title": "Neuroscience"}},size=30)
-    for hit in response["hits"]["hits"][:30]: 
+    n=60
+    response=es.search(index="libgen", query= {"match": {"Title": "magnetic Domains"}},size=n)
+    for hit in response["hits"]["hits"]: 
         year=hit["_source"].get('Year', 2000) or 2000  
         if hit["_source"].get('Language', '')!="English":
           continue     
         print(f"LG:{hit["_source"].get('Year', 0)}:{hit["_source"]["Title"]}")
         
-        
-        closestTitle(hit["_source"]["Title"],year,"en")      
+        try:
+          closestTitle(hit["_source"]["Title"],year,"en")  
+        except Exception as e:
+          print("Error:", e)    

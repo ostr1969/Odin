@@ -28,7 +28,7 @@ RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 RUN ln -s /usr/bin/python /usr/local/bin/python 
 # Upgrade pip and install Python packages
-
+RUN python3 -m pip install --no-cache-dir rapidfuzz
 
 # Optional: create non-root working directory
 WORKDIR /app

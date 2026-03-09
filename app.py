@@ -36,7 +36,13 @@ def build_query(filters):
                     "query": f["value"],
                     "fields": ["ngrams*"]
                 }
-            })        
+            })  
+        elif field == "id": 
+              if "openalex" in f.get("value"):
+                s=f.get("value")
+              else:
+                s="https://openalex.org/"+f.get("value")   
+              must.append({"match": {field: s}})   
         else:
             if f.get("value"):
                 must.append({"match": {field: f["value"]}})

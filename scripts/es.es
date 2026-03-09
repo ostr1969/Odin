@@ -79,9 +79,9 @@ POST libgen/_update/874611_d5c5af05d51c83da3a4cb833d5e830f7
     "content": "Alice in Wonderland "
   }
 }
-get works3/_search?filter_path=*.*.*.title,*.*._score,*.*._explanation&search_type=dfs_query_then_fetch
+get works3/_search?filter_path=*.*.*.title,*.*._score,*.*._explanation
 {
-    "size": 2,
+    "size": 1,
     "explain": true,
     "query": {
         "function_score": {
@@ -94,18 +94,11 @@ get works3/_search?filter_path=*.*.*.title,*.*._score,*.*._explanation&search_ty
                             }
                         }
                     ],
-                    "must_not": [
-                        {
-                            "term": {
-                                "type": "article"
-                            }
-                        }
-                    ],
                     "should": [
                         {
                             "match_phrase": {
                                 "title": {
-                                    "query": "Neuroscience",
+                                    "query": "Magnetic Domains: The Analysis of Magnetic Microstructures",
                                     "slop": 2,
                                     "boost": 5
                                 }
@@ -114,19 +107,9 @@ get works3/_search?filter_path=*.*.*.title,*.*._score,*.*._explanation&search_ty
                         {
                             "match": {
                                 "title": {
-                                    "query": "Neuroscience",
+                                    "query": "Magnetic Domains: The Analysis of Magnetic Microstructures",
                                     "operator": "and",
                                     "boost": 2
-                                }
-                            }
-                        },
-                        {
-                            "match": {
-                                "title": {
-                                    "query": "Neuroscience",
-                                    "fuzziness": "AUTO",
-                                    "minimum_should_match": "70%",
-                                    "boost": 1
                                 }
                             }
                         }
@@ -135,31 +118,7 @@ get works3/_search?filter_path=*.*.*.title,*.*._score,*.*._explanation&search_ty
                 }
             },
             "boost_mode": "multiply",
-            "score_mode": "multiply",
-            "functions": [
-                {
-                    "gauss": {
-                        "publication_year": {
-                            "origin": "2004",
-                            "scale": 1,
-                            "offset": 0,
-                            "decay": 0.8
-                        }
-                    }
-                },
-                {
-          "filter": {
-            "bool": {
-              "must_not": {
-                "exists": {
-                  "field": "publication_year"
-                }
-              }
-            }
-          },
-          "weight": 0.9
-        }
-            ]
+            "score_mode": "multiply"
         }
     }
 }
