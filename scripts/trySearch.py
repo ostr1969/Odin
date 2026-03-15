@@ -139,8 +139,10 @@ def closestTitle(query,year,lang):
         return
     for hit in res["hits"]["hits"]:
       #ratio=SequenceMatcher(None, query, hit["_source"]["title"]).ratio()
-      ratio=fuzz.ratio(query, hit["_source"]["title"])/100
-      print(f"OA:{hit["_source"].get("publication_year","")}:{hit["_source"]["title"]} ({hit["_source"]["type"]},{ratio:.2f})")
+      
+      oa=hit["_source"]["title"].lower().strip()
+      ratio=fuzz.ratio(query, oa)/100
+      print(f"OA:{hit["_source"].get("publication_year","")}:{oa} ({hit["_source"]["type"]},{ratio:.2f})")
       #print(f"OA:{hit["_source"].get("publication_year","")}:{hit["_score"]}:{hit["_source"]["title"]} ({hit["_source"]["type"]})")
     print("-----")
     
@@ -151,10 +153,12 @@ if __name__ == "__main__":
     for hit in response["hits"]["hits"]: 
         year=hit["_source"].get('Year', 2000) or 2000  
         if hit["_source"].get('Language', '')!="English":
-          continue     
-        print(f"LG:{hit["_source"].get('Year', 0)}:{hit["_source"]["Title"]}")
+          continue
+        q=hit["_source"]["Title"].lower().strip()     
+        print(f"LG:{hit["_source"].get('Year', 0)}:{q};")
         
         try:
-          closestTitle(hit["_source"]["Title"],year,"en")  
+          
+          closestTitle(q,year,"en")  
         except Exception as e:
           print("Error:", e)    

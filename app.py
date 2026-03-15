@@ -154,7 +154,10 @@ def aggs(index, field):
     res = es.search(index=index, body=body)
     buckets = res["aggregations"]["values"]["buckets"]
     print("Aggregation:", buckets)
-    return jsonify([b["key_as_string"] for b in buckets])
+    k="key"
+    if field=="open_access.is_oa":
+        k="key_as_string"
+    return jsonify([b[k] for b in buckets])
 
 if __name__ == "__main__":
     check_es_alive()
