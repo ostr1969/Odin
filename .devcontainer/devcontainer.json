@@ -6,13 +6,13 @@
   "image":"tika:flask",
   "workspaceFolder": "/workspace",
   "runArgs": [
-    "-p", "9998:9998", "-p" ,"5002:5002","--name", "tikaflask"
+    "-p", "9998:9998", "-p" ,"5002:5002", "-p" ,"8501:8501","--name", "tikaflask"
   ],
     "mounts": [
     "source=${localWorkspaceFolder},target=/workspace,type=bind"
   ],
   "postStartCommand": "exec java -cp \"/tika-server-standard-3.2.3.jar:/tika-extras/*\" org.apache.tika.server.core.TikaServerCli -h 0.0.0.0",
-   "forwardPorts": [5002,9998],
+   "forwardPorts": [5002,9998,8501],
   "customizations": {
     "vscode": {
       "extensions": [
