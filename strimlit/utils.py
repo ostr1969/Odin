@@ -41,6 +41,13 @@ def build_query(filters):
                     "fields": ["abstract", "title"]
                 }
             })
+        elif field == "abstract+title+content":
+            must.append({
+                "query_string": {
+                    "query": f["value"],
+                    "fields": ["abstract", "title", "content"]
+                }
+            })            
         elif field == "publication_year":
             rng = {}
             if f.get("from"):
@@ -57,6 +64,12 @@ def build_query(filters):
                     "fields": ["ngrams*"]
                 }
             })  
+        elif field == "types":
+            must.append({
+                "terms": {
+                    "type": f["value"]
+                }
+            })      
         elif field == "id": 
               if "openalex" in f.get("value"):
                 s=f.get("value")
@@ -66,6 +79,6 @@ def build_query(filters):
         else:
             if f.get("value"):
                 must.append({"match": {field: f["value"]}})
-    query={"query": {"bool": {"must": must}},"size":100}
+    query= {"bool": {"must": must}}
     #print(query)
     return query    
