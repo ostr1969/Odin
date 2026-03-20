@@ -70,6 +70,7 @@ if  res is not None:
     with st.container(border=True):
         st.subheader(f"Found {total:,} results")
         st.markdown("---") 
+        
         for r in results:
             if r.get("type")=="book" or r.get("type")=="book-chapter":
                 icon="📚"
@@ -93,7 +94,7 @@ if  res is not None:
                 , unsafe_allow_html=True
                 )
                 
-                st.button("download", on_click=lambda id=r.get("id"): download(id),
-                          key=f"file_button_{r.get('id')}",type="primary")
+                st.button("📥",type="tertiary", on_click=lambda id=r.get("id"): download(id),
+                          key=f"file_button_{r.get('id')}")
                 
                 
