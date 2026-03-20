@@ -1,4 +1,5 @@
 from config import es
+import streamlit as st
 def get_topics_dn(ids_dict:dict,index:str):
     ids=[topic["key"] for topic in ids_dict]
     topdict={}
@@ -69,7 +70,13 @@ def build_query(filters):
                 "terms": {
                     "type": f["value"]
                 }
-            })      
+            })  
+        elif field == "language":
+            must.append({
+                "terms": {
+                    "language": f["value"]
+                }
+            })        
         elif field == "id": 
               if "openalex" in f.get("value"):
                 s=f.get("value")
@@ -81,4 +88,38 @@ def build_query(filters):
                 must.append({"match": {field: f["value"]}})
     query= {"bool": {"must": must}}
     #print(query)
-    return query    
+    return query   
+
+def mybutton(label, key=None, bgcolor=None, fgcolor=None, reversed=False, padding=None, **kwargs):
+    if key is None:
+        raise ValueError("You must provide a unique key")
+
+    styles = []
+    
+
+    if bgcolor:
+        styles.append(f"background-color: {bgcolor};")
+
+    if fgcolor:
+        styles.append(f"color: {fgcolor};")
+    if reversed:
+        styles.append(f"background-color: black; color: white;")
+    if padding:
+        styles.append(f"padding: {padding};")  # e.g. "10px 20px"
+
+    if styles:
+        style_str = " ".join(styles)
+       
+
+        st.markdown(f"""
+        <style>
+        div.st-key-{key} button {{
+            {style_str}
+        }}
+        div.st-key-{key} button:hover {{
+            filter: brightness(0.9);
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+
+    return st.button(label, key=key, **kwargs) 
