@@ -1,6 +1,6 @@
 import streamlit as st
 import config
-from config import es
+
 from utils import build_query,get_topics_dn,mybutton,get_concepts_dn,firstsearch
 from dialogs.searchdialogs import yeardialog,typedialog,topicsdialog,langdialog,conceptsdialog
 from streamlit_extras.mention import mention
@@ -83,4 +83,11 @@ if  res is not None:
                 icon="🎓"
             else:                icon="📁"
             m=mention(label=r.get("type"),icon=icon, url=r.get("id"), write=False)
-            st.markdown(f"{icon},\"{r['title']}\",{r.get('publication_year')}",unsafe_allow_html=True)   
+            
+            url = f"/json?index={st.session_state.ind}&id={r.get('id').replace('https://openalex.org/','')}"
+            #st.markdown(f"{icon},\"{r['title']}\",{r.get('publication_year')}",unsafe_allow_html=True)   
+            st.markdown(
+                f'{icon} <a href="{url}" style="text-decoration:none; " target="_blank">'
+                f'"{r["title"]}"</a>, {r.get("publication_year")}'
+                , unsafe_allow_html=True
+            )
