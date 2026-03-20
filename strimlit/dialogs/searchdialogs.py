@@ -1,4 +1,11 @@
 import streamlit as st
+import os
+import shutil
+from config import es,FILES_DIR
+from pathlib import Path
+
+
+os.makedirs(FILES_DIR, exist_ok=True)
 
 
 
@@ -71,3 +78,33 @@ def conceptsdialog(concepts):
     if st.button("Apply",type="primary"):
         st.session_state["filters"]["concept_filters"] = [v for t,v in httpcut.items() if st.session_state.get(f"concept_{t}")]
         st.rerun()                
+def file_dialog(id):
+    @st.dialog("File options")
+    def show():
+        id1=id.replace('https://openalex.org/','')
+        path=es.get(index=st.session_state.ind, id=id1)["_source"].get("path","")
+        path=r"/workspace/Aftabi.pdf"
+        st.write(f"File path: {path}, id: {id}")
+
+        # --- PDF: open directly (no copy) ---
+  
+        local_url = f"http://localhost:8000/{path}"
+
+        filename = Path(path).name
+        ext = Path(path).suffix  
+
+        # --- Non-PDF: copy + load ---
+        local_path = os.path.join(FILES_DIR, id1+ext)
+        
+
+        # Copy only once
+        if not os.path.exists(local_path):
+            with st.spinner("Copying file..."):
+                shutil.copyfile(path, local_path)
+        #open file server on the root of the files by "python -m http.server 8000"
+        st.markdown(
+                f'<a href="http://localhost:8000/{id1+ext}" target="_blank">📄 Open PDF</a>',
+                unsafe_allow_html=True
+            )
+
+    show()

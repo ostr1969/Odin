@@ -1,8 +1,8 @@
 import streamlit as st
 import config
 
-from utils import build_query,get_topics_dn,mybutton,get_concepts_dn,firstsearch
-from dialogs.searchdialogs import yeardialog,typedialog,topicsdialog,langdialog,conceptsdialog
+from utils import build_query,get_topics_dn,mybutton,get_concepts_dn,firstsearch,download
+from dialogs.searchdialogs import yeardialog,typedialog,topicsdialog,langdialog,conceptsdialog,file_dialog
 from streamlit_extras.mention import mention
 import streamlit.components.v1 as components
 res=None
@@ -86,8 +86,14 @@ if  res is not None:
             
             url = f"/json?index={st.session_state.ind}&id={r.get('id').replace('https://openalex.org/','')}"
             #st.markdown(f"{icon},\"{r['title']}\",{r.get('publication_year')}",unsafe_allow_html=True)   
-            st.markdown(
+            with st.container(horizontal=True,vertical_alignment="center",horizontal_alignment="left",gap="xxsmall"):
+                st.markdown(
                 f'{icon} <a href="{url}" style="text-decoration:none; " target="_blank">'
                 f'"{r["title"]}"</a>, {r.get("publication_year")}'
                 , unsafe_allow_html=True
-            )
+                )
+                
+                st.button("download", on_click=lambda id=r.get("id"): download(id),
+                          key=f"file_button_{r.get('id')}",type="primary")
+                
+                

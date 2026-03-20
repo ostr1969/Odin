@@ -3,3 +3,4 @@ __pycache__/
 __pycache__/config.cpython-312.pyc
 libgen_compact.sql
 Samples/
+*.pdf

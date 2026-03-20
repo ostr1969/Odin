@@ -1,5 +1,10 @@
-from config import es
+from config import es,FILES_DIR
 import streamlit as st
+from pathlib import Path
+import os,shutil
+import streamlit.components.v1 as components
+
+#FILES_DIR = "files"  # local folder inside your app
 def get_topics_dn(ids_dict:dict,index:str):
     ids=[topic["key"] for topic in ids_dict]
     topdict={}
@@ -177,3 +182,39 @@ def mybutton(label, key=None, bgcolor=None, fgcolor=None, reversed=False, paddin
         """, unsafe_allow_html=True)
 
     return st.button(label, key=key, **kwargs) 
+def download(id):
+        
+        id1=id.replace('https://openalex.org/','')
+        path=es.get(index=st.session_state.ind, id=id1)["_source"].get("path","")
+        path=r"/workspace/Aftabi.pdf"
+        #st.write(f"File path: {path}, id: {id}")
+
+        # --- PDF: open directly (no copy) ---
+  
+        local_url = f"http://localhost:8000/{path}"
+
+        filename = Path(path).name
+        ext = Path(path).suffix  
+
+        # --- Non-PDF: copy + load ---
+        local_path = os.path.join(FILES_DIR, id1+ext)
+        #print(FILES_DIR,id1+ext)
+
+        # Copy only once
+        if not os.path.exists(local_path):
+            with st.spinner("Copying file..."):
+                shutil.copyfile(path, local_path)
+        #open file server on the root of the files by "python -m http.server 8000"
+        # st.markdown(
+        #         f'<a href="http://localhost:8000/{id1+ext}" target="_blank">📄 Open PDF</a>',
+        #         unsafe_allow_html=True
+        #     )
+        
+        components.html(f"""
+        <script>
+           
+            // You can also open a URL in a new tab
+            window.open("http://localhost:8000/{id1+ext}", "_blank");
+        </script>
+    """, height=0, width=0)
+        #print("downloaded:"+f"http://localhost:8000/{id1+ext}")
