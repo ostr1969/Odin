@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
-print(st.session_state)
-globs=["pharse","ind","searchfields"]
+#print(st.session_state)
+globs=["pharse","ind"]
 for g in globs:
     if g  in st.session_state:
         st.session_state[g] = st.session_state[g]

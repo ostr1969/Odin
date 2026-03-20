@@ -4,35 +4,35 @@ import streamlit as st
 
 @st.dialog("Year Filter",width="medium")
 def yeardialog():
-        #col1, col2, col3 = st.columns(3)
-        print("A:",st.session_state)
-        
-        #st.markdown('<div class="narrowbutton">',unsafe_allow_html=True)
-        if st.button("Since 2025",type="tertiary"):            
+        with st.container(gap=None):
+            if st.button("Since 2025",type="tertiary"):            
+                
+                st.session_state["filters"]["dchoice"] = "0"
             
-            st.session_state["filters"]["dchoice"] = "0"
-           
-            st.rerun()
-              
-        if st.button("Since 2020",type="tertiary"):
-            st.session_state["filters"]["dchoice"] = "1"
-            
-            st.rerun()
-        with st.container(horizontal=True,vertical_alignment="bottom",horizontal_alignment="left"):
-            if st.button("Custom range...",type="tertiary"):
-                st.session_state["filters"]["dchoice"] = "custom"
-            if st.session_state["filters"].get("dchoice","") == "custom":
-                fromyear=st.session_state["filters"].get("from_year",2000)
-                toyear=st.session_state["filters"].get("to_year",2100)
-                st.number_input("from", key="from_year",placeholder="From year",
-                                    label_visibility="hidden",min_value=0,max_value=2100,step=10,value=fromyear,width=150)
-                st.number_input("to", key="to_year",placeholder="To year",
-                                    label_visibility="hidden",min_value=0,max_value=2100,step=10,value=toyear,width=150)
-                if st.button("Apply",type="primary"):
-                    st.session_state["filters"]["from_year"] = st.session_state["from_year"]
-                    st.session_state["filters"]["to_year"] = st.session_state["to_year"]                  
-                    st.rerun()
-                #st.rerun()
+                st.rerun()
+                
+            if st.button("Since 2020",type="tertiary"):
+                st.session_state["filters"]["dchoice"] = "1"
+                
+                st.rerun()
+            with st.container(horizontal=True,vertical_alignment="bottom",horizontal_alignment="left"):
+                if st.button("Custom range...",type="tertiary"):
+                    st.session_state["filters"]["dchoice"] = "custom"
+                if st.session_state["filters"].get("dchoice","") == "custom":
+                    fromyear=st.session_state["filters"].get("from_year",2000)
+                    toyear=st.session_state["filters"].get("to_year",2100)
+                    st.number_input("from", key="from_year",placeholder="From year",
+                                        label_visibility="hidden",min_value=0,max_value=2100,step=10,value=fromyear,width=150)
+                    st.number_input("to", key="to_year",placeholder="To year",
+                                        label_visibility="hidden",min_value=0,max_value=2100,step=10,value=toyear,width=150)
+                    if st.button("Apply",type="primary"):
+                        st.session_state["filters"]["from_year"] = st.session_state["from_year"]
+                        st.session_state["filters"]["to_year"] = st.session_state["to_year"]                  
+                        st.rerun()
+            if st.button("Clear",type="primary"):
+                if "dchoice" in st.session_state["filters"]:
+                    del st.session_state["filters"]["dchoice"]            
+                st.rerun()
         #st.markdown('</div>',unsafe_allow_html=True)            
           
 @st.dialog("Document types",width="small")
@@ -51,10 +51,23 @@ def langdialog(languages):
         st.rerun()        
 @st.dialog("Topics",width="small")
 def topicsdialog(topics):
-    #print("topic:",topics)
+    httpcut={}
     for t,v in topics.items():
-        
-        st.checkbox(f"{v[0]} ({v[1]})", key=f"topic_{t}")
+        t1=t.replace("https://openalex.org/","")
+        httpcut[t1]=t #long to short
+        #st.checkbox(f"{v[0]} ({v[1]})", key=f"topic_{t1}")
+        st.checkbox(f"{v[0]} ({t1})", key=f"topic_{t1}")
     if st.button("Apply",type="primary"):
-        st.session_state["filters"]["topic_filters"] = [t for t in topics if st.session_state.get(f"topic_{t}")]
-        st.rerun()        
+        st.session_state["filters"]["topic_filters"] = [v for t,v in httpcut.items() if st.session_state.get(f"topic_{t}")]
+        st.rerun() 
+@st.dialog("Concepts",width="small")
+def conceptsdialog(concepts):
+    httpcut={}
+    for t,v in concepts.items():
+        t1=t.replace("https://openalex.org/","")
+        httpcut[t1]=t #long to short
+        #st.checkbox(f"{v[0]} ({v[1]})", key=f"concept_{t1}")
+        st.checkbox(f"{v[0]} ({t1})", key=f"concept_{t1}")
+    if st.button("Apply",type="primary"):
+        st.session_state["filters"]["concept_filters"] = [v for t,v in httpcut.items() if st.session_state.get(f"concept_{t}")]
+        st.rerun()                

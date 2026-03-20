@@ -21,6 +21,28 @@ def get_topics_dn(ids_dict:dict,index:str):
            if t["id"] in topdict:
                 resd[t["id"]]=(t["display_name"],topdict[t["id"]]) 
     return resd
+def get_concepts_dn(ids_dict:dict,index:str):
+    ids=[concept["key"] for concept in ids_dict]
+    
+    conceptdict={}
+    resd={}
+    for t in ids_dict:
+        conceptdict[t["key"]]=t["doc_count"]
+    for id in ids:
+        resp = es.search(
+        index=index,
+        body={
+            "query": {
+                "term": {"concepts.id": id}
+            },
+            "_source": ["concepts.id", "concepts.display_name"],
+            "size": 1
+        }
+        )
+        for t in resp["hits"]["hits"][0]["_source"]["concepts"]:
+           if t["id"] in conceptdict:
+                resd[t["id"]]=(t["display_name"],conceptdict[t["id"]]) 
+    return resd
 def check_es_alive():
     res=es.ping()
     if res:
@@ -48,7 +70,14 @@ def build_query(filters):
                     "query": f["value"],
                     "fields": ["abstract", "title", "content"]
                 }
-            })            
+            }) 
+        elif field == "title":
+            must.append({
+                "query_string": {
+                    "query": f["value"],
+                    "fields": [ "title"]
+                }
+            })                    
         elif field == "publication_year":
             rng = {}
             if f.get("from"):
@@ -64,17 +93,11 @@ def build_query(filters):
                     "query": f["value"],
                     "fields": ["ngrams*"]
                 }
-            })  
-        elif field == "types":
+            })    
+        elif field in ["language","type","topics.id","concepts.id"]:
             must.append({
                 "terms": {
-                    "type": f["value"]
-                }
-            })  
-        elif field == "language":
-            must.append({
-                "terms": {
-                    "language": f["value"]
+                    field: f["value"]
                 }
             })        
         elif field == "id": 
@@ -89,6 +112,37 @@ def build_query(filters):
     query= {"bool": {"must": must}}
     #print(query)
     return query   
+def firstsearch(filters):
+    
+    q=build_query(filters)
+    res = es.search(
+            index=st.session_state.ind,
+            track_total_hits=True,
+            query=q,
+            size=100,
+            
+            aggregations={
+               
+                    "topics": {
+                        "terms": {
+                            "field": "topics.id",
+                            "size": 10
+                            }
+                    
+                }, 
+                     "concepts": {
+                        "terms": {
+                            "field": "concepts.id",
+                            "size": 10
+                            }
+                    
+                }, 
+                    "types":{ "terms": { "field": "type", "size": 10 }},
+                    "language":{ "terms": { "field": "language", "size": 5 }}
+            }
+        )
+    #print(res["hits"]["total"]["value"])
+    return res
 
 def mybutton(label, key=None, bgcolor=None, fgcolor=None, reversed=False, padding=None, **kwargs):
     if key is None:

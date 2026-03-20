@@ -8,6 +8,8 @@ if 'navigation_source' not in st.session_state:
     st.session_state.navigation_source = 'direct_access'  # Default for direct access
     if "pharse" in st.session_state:
         del st.session_state.pharse
+    if "filters" in st.session_state:
+        del st.session_state.filters    
 st.title("OA&LG Search",text_alignment="center")
 if st.session_state.get("ind"): 
     cnt=es.count(index=st.session_state.ind)
