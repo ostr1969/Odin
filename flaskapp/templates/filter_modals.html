@@ -185,6 +185,57 @@
   </div>
 </div>
 
+<div id="conceptsModal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <button class="close-btn" >×</button>
+
+    <form id="docForm">
+     <div id="docTypesContainer">
+        {% for t,v in concepts.items() %}
+        {%set t1=t.replace("https://openalex.org/","")%}
+          <div class="checkbox-row">
+            <input type="checkbox"
+                  name="doc_types"
+                  id="typ_{{ t1 }}"
+                  value="{{ t }}">
+            <label for="typ_{{ t1 }}">
+              {{ v[0] }} ({{ v[1] }})
+            </label>
+          </div>
+        {% endfor %}
+    </div>
+
+      <button type="submit">Apply</button>
+    </form>
+  </div>
+</div>
+
+<div id="langModal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <button class="close-btn" >×</button>
+
+    <form id="docForm">
+     <div id="docTypesContainer">
+        {% for t in  languages %}
+        
+         <div class="checkbox-row">
+            <input type="checkbox"
+                  name="doc_types"
+                  id="typ_{{ t['key'] }}"
+                  value="{{ t['key'] }}">
+            <label for="typ_{{ t['key'] }}">
+              {{ t['key'] }} ({{ t['doc_count'] }})
+            </label>
+          </div>
+        {% endfor %}
+    </div>
+
+      <button type="submit">Apply</button>
+    </form>
+  </div>
+</div>
+
+
 <div class="modal-overlay" id="yearsModal" style="display:none">
   <div class="modal">
     <button class="close-btn" onclick="closeModal()">×</button>
