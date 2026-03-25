@@ -1,8 +1,8 @@
 from config import es,FILES_DIR
-import streamlit as st
+
 from pathlib import Path
 import os,shutil
-import streamlit.components.v1 as components
+
 
 #FILES_DIR = "files"  # local folder inside your app
 def get_topics_dn(ids_dict:dict,index:str):
@@ -117,11 +117,11 @@ def build_query(filters):
     query= {"bool": {"must": must}}
     #print(query)
     return query   
-def firstsearch(filters):
+def firstsearch(filters,ind):
     
     q=build_query(filters)
     res = es.search(
-            index=st.session_state.ind,
+            index=ind,
             track_total_hits=True,
             query=q,
             size=100,
@@ -149,68 +149,11 @@ def firstsearch(filters):
     #print(res["hits"]["total"]["value"])
     return res
 
-def mybutton(label, key=None, bgcolor=None, fgcolor=None, reversed=False, padding=None,tooltip=None, **kwargs):
-    if key is None:
-        raise ValueError("You must provide a unique key")
 
-    styles = []
-    
-
-    if bgcolor:
-        styles.append(f"background-color: {bgcolor};")
-
-    if fgcolor:
-        styles.append(f"color: {fgcolor};")
-    if reversed:
-        styles.append(f"background-color: black; color: white;")
-    if padding:
-        styles.append(f"padding: {padding};")  # e.g. "10px 20px"
-    if tooltip is None:
-        tooltip="rrr"    
-    hover=f"""/* tooltip text */
-            .st-key-{key}::after {{
-                content: {tooltip};
-                position: absolute;
-                bottom: 120%;
-                left: 50%;
-                transform: translateX(-50%);
-                background-color: black;
-                color: white;
-                padding: 5px 8px;
-                border-radius: 6px;
-                font-size: 12px;
-                white-space: nowrap;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.2s;
-            }}
-
-            /* show on hover */
-            .st-key-{key}:hover::after {{
-                opacity: 1;
-            }}"""
-    
-    if styles:
-        style_str = " ".join(styles)
-       
-
-        st.markdown(f"""
-        <style>
-        div.st-key-{key} button {{
-            {style_str}
-        }}
-        div.st-key-{key} button:hover {{
-            filter: brightness(0.9);
-        }}
-        {hover}
-        </style>
-        """, unsafe_allow_html=True)
-
-    return st.button(label, key=key, **kwargs) 
-def download(id1):
+def download(id1,ind):
         
         
-        path=es.get(index=st.session_state.ind, id=id1)["_source"].get("path","")
+        path=es.get(index=ind, id=id1)["_source"].get("path","")
         path=r"/workspace/Aftabi.pdf"
         #st.write(f"File path: {path}, id: {id}")
 
@@ -227,13 +170,9 @@ def download(id1):
 
         # Copy only once
         if not os.path.exists(local_path):
-            with st.spinner("Copying file..."):
                 shutil.copyfile(path, local_path)
         #open file server on the root of the files by "python -m http.server 8000"
-        # st.markdown(
-        #         f'<a href="http://localhost:8000/{id1+ext}" target="_blank">📄 Open PDF</a>',
-        #         unsafe_allow_html=True
-        #     )
+       
         
         components.html(f"""
         <script>

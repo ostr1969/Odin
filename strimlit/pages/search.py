@@ -53,9 +53,9 @@ if  res is not None:
     total = res["hits"]["total"]["value"]
     results = [hit["_source"] for hit in res["hits"]["hits"]]
     with st.container(horizontal=True,vertical_alignment="center",horizontal_alignment="left",gap="xxsmall"):
-        mybutton("Year ▾", on_click=yeardialog,key="year_button",
+        mybutton("📅 ▾", on_click=yeardialog,key="year_button",tooltip="year",
                  reversed=st.session_state["filters"].get("dchoice","")!="")
-        mybutton("Document types ▾", on_click=lambda: typedialog(types),key="type_button",
+        mybutton("📖📑📓📕📋📝 ▾", on_click=lambda: typedialog(types),key="type_button",
                  reversed=(st.session_state["filters"].get("type_filters",[])!=[]))
         
         mybutton("Topics ▾", on_click=lambda: topicsdialog(topicsdn),key="topic_button",
@@ -66,11 +66,24 @@ if  res is not None:
         mybutton("Language ▾", on_click=lambda: langdialog(languages),key="language_button",
                  reversed=(st.session_state["filters"].get("language_filters",[])!=[]))
         st.toggle("Open access",key="oa_filter")
-        st.button("Clear filters", on_click=lambda: st.session_state.update({"filters": {}}),key="clear_button",type="primary")
+        st.button("✗", on_click=lambda: st.session_state.update({"filters": {}}),key="clear_button",type="primary")
     with st.container(border=True):
         st.subheader(f"Found {total:,} results")
         st.markdown("---") 
-        
+        # st.markdown("""<style>
+        #             .st-key-file_button_W4402760922 button {
+        #             background-color: #ff4b4b;
+        #             color: white;
+                    
+        #             height: 20px
+        #         }
+        #         .st-key-file_button_W4402760922 div {
+        #             height: 20px
+        #         }
+        #         .st-key-file_button_W4402760922  {
+        #             height: 20px
+        #         }
+        #         </style>""",unsafe_allow_html=True)
         for r in results:
             if r.get("type")=="book" or r.get("type")=="book-chapter":
                 icon="📚"
@@ -84,8 +97,8 @@ if  res is not None:
                 icon="🎓"
             else:                icon="📁"
             m=mention(label=r.get("type"),icon=icon, url=r.get("id"), write=False)
-            
-            url = f"/json?index={st.session_state.ind}&id={r.get('id').replace('https://openalex.org/','')}"
+            id1=r.get('id').replace('https://openalex.org/','')
+            url = f"/json?index={st.session_state.ind}&id={id1}"
             #st.markdown(f"{icon},\"{r['title']}\",{r.get('publication_year')}",unsafe_allow_html=True)   
             with st.container(horizontal=True,vertical_alignment="center",horizontal_alignment="left",gap="xxsmall"):
                 st.markdown(
@@ -94,7 +107,7 @@ if  res is not None:
                 , unsafe_allow_html=True
                 )
                 
-                st.button("📥",type="tertiary", on_click=lambda id=r.get("id"): download(id),
-                          key=f"file_button_{r.get('id')}")
+                st.button("📥",type="tertiary", on_click=lambda id=r.get("id"): download(id1),
+                          key=f"file_button_{id1}")
                 
                 

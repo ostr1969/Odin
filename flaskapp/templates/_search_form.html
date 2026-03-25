@@ -1,0 +1,34 @@
+<form method="POST" action="/search">
+     <div class="search-container">
+    <input 
+        type="text" 
+        name="query" 
+        placeholder="Enter search phrase"
+        value="{{ query or '' }}"
+        required
+    >
+<!-- only show button when requested -->
+    {% if show_button %}
+        <button type="submit">Apply</button>
+    {% endif %}
+    </div>
+    <div class="row">
+        <select name="index">
+            {% for i in indexes %}
+                <option value="{{ i }}" {% if i == index %}selected{% endif %}>
+                    {{ i }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="field">
+            {% for f in fields %}
+                <option value="{{ f }}" {% if f == field %}selected{% endif %}>
+                    {{ f }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    
+</form>

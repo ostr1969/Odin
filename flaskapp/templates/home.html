@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OA&LG Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <h1>OA&LG Search</h1>
+    <h2>Search over 476M articles and books of OA&LG content</h2>
+
+    <div class="box">
+        <form method="POST" action="/search">
+            <input 
+                type="text" 
+                name="query" 
+                placeholder="Enter search phrase" 
+                required
+                onkeydown="if(event.key==='Enter'){this.form.submit();}"
+            >
+
+            <div class="row">
+                <select name="index">
+                    {% for i in indexes %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="field">
+                    {% for f in fields %}
+                        <option value="{{ f }}">{{ f }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

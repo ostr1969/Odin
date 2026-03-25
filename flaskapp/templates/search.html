@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<h1>Search Results</h1>
+ <div class="box">
+{% include "_search_form.html" with context %}
+</div>
+<button class="openmodal" data-modal="yearsModal" id="yearsBtn">📅 ▾</button>
+<button class="openmodal" data-modal="typesModal" id="typesBtn">📖📑📓📕📋📝 ▾</button>
+<button class="openmodal" data-modal="topicsModal" id="topicsBtn">Topics ▾</button>
+<button class="openmodal" data-modal="conceptsModal" id="conceptsBtn">Concepts ▾</button>
+<button class="openmodal" data-modal="langModal" id="langBtn">Language ▾</button>
+{% include "filter_modals.html" %}
+<!-- results placeholder -->
+       <div class="card">
+          <h3>Results</h3>
+          <table class="results-table">
+            <thead>
+              <tr>
+                {% for f in displayed_fields %}
+                  <th>{{ f }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for res in results %}
+              {% set r=res["_source"] %}
+                <tr>
+                  {% for f in displayed_fields %}
+                    {% if f=="countries_hist" %}
+                    <td ><div class="truncate" title="{{ r.get(f, "") }}">{{ r.get(f, "") }}</div></td>
+                    {% elif f == "id" %}                  
+                    <td>
+                      <a href="{{ r.get(f) }}" class="id-link" target="_blank" rel="noopener">
+                        {{ r.get(f) }}
+                      </a>
+                    </td>
+
+                    {% else %}
+                    <td>{{ r.get(f, "") }}</td>
+                    {% endif %}
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+</body>
+<script>
+  function openModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.style.display = "block";
+}
+document.addEventListener("click", function (e) {
+  if (e.target.matches(".openmodal")) {
+    const id = e.target.dataset.modal;
+    openModal(id);
+  }
+});
+  function initModal() {
+  const yearsmodal = document.getElementById("yearsModal");
+  const typesmodal = document.getElementById("typesModal");
+  const yearsBtn = document.getElementById("yearsBtn");
+  const typesBtn = document.getElementById("typesBtn");
+  //const closeBtn = document.getElementById("closeModalBtn");
+
+  //yearsBtn.onclick = () => yearsmodal.style.display = "block";
+  //typesBtn.onclick = () => typesmodal.style.display = "block";
+  //closeBtn.onclick = () => modal.style.display = "none";
+}
+initModal()
+</script>
+</html>
