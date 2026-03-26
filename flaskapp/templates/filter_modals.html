@@ -141,19 +141,7 @@
     <button class="close-btn" >×</button>
 
     <form id="typesForm">
-     <div id="TypeContainer">
-        {% for t in types %}
-          <div class="checkbox-row">
-            <input type="checkbox"
-                  name="doc_types"
-                  id="typ_{{ t['key'] }}"
-                  value="{{ t['key'] }}">
-            <label for="typ_{{ t['key'] }}">
-              {{ t['key'] }} ({{ t['doc_count'] }})
-            </label>
-          </div>
-        {% endfor %}
-    </div>
+     <div id="typeContainer"> </div>
 
       <button type="submit">Apply</button>
     </form>
@@ -165,20 +153,7 @@
     <button class="close-btn" >×</button>
 
     <form id="topicsForm">
-     <div id="docTypesContainer">
-        {% for t,v in topics.items() %}
-        {%set t1=t.replace("https://openalex.org/","")%}
-          <div class="checkbox-row">
-            <input type="checkbox"
-                  name="topics"
-                  id="top_{{ t1 }}"
-                  value="{{ t }}">
-            <label for="top_{{ t1 }}">
-              {{ v[0] }} ({{ v[1] }})
-            </label>
-          </div>
-        {% endfor %}
-    </div>
+     <div id="topics.idContainer"> </div>
 
       <button type="submit">Apply</button>
     </form>
@@ -190,20 +165,7 @@
     <button class="close-btn" >×</button>
 
     <form id="conceptsForm">
-     <div id="docTypesContainer">
-        {% for t,v in concepts.items() %}
-        {%set t1=t.replace("https://openalex.org/","")%}
-          <div class="checkbox-row">
-            <input type="checkbox"
-                  name="concepts"
-                  id="con_{{ t1 }}"
-                  value="{{ t }}">
-            <label for="con_{{ t1 }}">
-              {{ v[0] }} ({{ v[1] }})
-            </label>
-          </div>
-        {% endfor %}
-    </div>
+     <div id="concepts.idContainer">  </div>
 
       <button type="submit">Apply</button>
     </form>
@@ -215,20 +177,7 @@
     <button class="close-btn" >×</button>
 
     <form id="langForm">
-     <div id="docTypesContainer">
-        {% for t in  languages %}
-        
-         <div class="checkbox-row">
-            <input type="checkbox"
-                  name="langs"
-                  id="lng_{{ t['key'] }}"
-                  value="{{ t['key'] }}">
-            <label for="lng_{{ t['key'] }}">
-              {{ t['key'] }} ({{ t['doc_count'] }})
-            </label>
-          </div>
-        {% endfor %}
-    </div>
+     <div id="languageContainer"></div>
 
       <button type="submit">Apply</button>
     </form>
@@ -383,11 +332,11 @@ document.getElementById("conceptsForm").onsubmit = async (e) => {
   }
 };
 
-async function loadTypes() {
-  const res = await fetch("/get_agg/type");
+async function simpleComboFill(v) {
+  const res = await fetch("/get_agg/"+v);
   const data = await res.json();
 
-  const container = document.getElementById("docTypesContainer");
+  const container = document.getElementById(v+"Container");
   container.innerHTML = "";
 
   data.types.forEach(t => {
@@ -396,10 +345,10 @@ async function loadTypes() {
 
     row.innerHTML = `
       <input type="checkbox"
-             name="doc_types"
-             id="typ_${t.key}"
+             name="checkboxes"
+             id=${v}+"_${t.key}"
              value="${t.key}">
-      <label for="typ_${t.key}">
+      <label for=${v}+"_${t.key}">
         ${t.key} (${t.doc_count})
       </label>
     `;
@@ -407,6 +356,43 @@ async function loadTypes() {
     container.appendChild(row);
   });
 }
+
+async function complexComboFill(v) {
+ const res = await fetch("/get_agg/"+v);
+  const data = await res.json();
+
+  const container = document.getElementById(v+"Container");
+  container.innerHTML = "";
+
+  Object.entries(data.types).forEach(([t, d]) => {
+    const t1 = t.replace("https://openalex.org/", "");
+
+    const row = document.createElement("div");
+    row.className = "checkbox-row";
+
+    row.innerHTML = `
+      <input type="checkbox"
+             name="checkboxes"
+             id=${v}+"_${t1}"
+             value="${t}">
+      <label for=${v}+"_${t1}">
+        ${d[0]} (${d[1]})
+      </label>
+    `;
+
+    container.appendChild(row);
+  
+  });
+}
+
+ 
+
+
+
+document.getElementById("typesBtn").addEventListener("click", () => simpleComboFill("type"));
+document.getElementById("langBtn").addEventListener("click", () => simpleComboFill("language"));
+document.getElementById("topicsBtn").addEventListener("click", () => complexComboFill("topics.id"));
+document.getElementById("conceptsBtn").addEventListener("click", () => complexComboFill("concepts.id"));
 
 
 

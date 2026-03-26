@@ -120,32 +120,14 @@ def build_query(filters):
 def firstsearch(filters,ind):
     
     q=build_query(filters)
-    print(q)
+    #print(q)
     res = es.search(
             index=ind,
             track_total_hits=True,
             query=q,
-            size=100,
+            size=100
             
-            aggregations={
-               
-                    "topics": {
-                        "terms": {
-                            "field": "topics.id",
-                            "size": 10
-                            }
-                    
-                }, 
-                     "concepts": {
-                        "terms": {
-                            "field": "concepts.id",
-                            "size": 10
-                            }
-                    
-                }, 
-                    "types":{ "terms": { "field": "type", "size": 10 }},
-                    "language":{ "terms": { "field": "language", "size": 5 }}
-            }
+            
         )
     #print(res["hits"]["total"]["value"])
     return res
@@ -177,6 +159,7 @@ def aggsearch(filters,ind,aggby):
     return res
 
 def get_filters(session):
+    #print(session)
     filters=[{"field":session["field"],"value":session["query"]}]
     if session["filters"].get("dchoice") == "0":
         filters.append({"field":"publication_year","from":2025,"to":3000})
@@ -195,35 +178,4 @@ def get_filters(session):
         filters.append({"field":"language","value":session["filters"].get("language_filters")}) 
     if session.get("oa_filter"):
         filters.append({"field":"primary_location.is_oa","value":session["filters"].get("oa_filter")}) 
-def download(id1,ind):
-        
-        
-        path=es.get(index=ind, id=id1)["_source"].get("path","")
-        path=r"/workspace/Aftabi.pdf"
-        #st.write(f"File path: {path}, id: {id}")
-
-        # --- PDF: open directly (no copy) ---
-  
-        local_url = f"http://localhost:8000/{path}"
-
-        filename = Path(path).name
-        ext = Path(path).suffix  
-
-        # --- Non-PDF: copy + load ---
-        local_path = os.path.join(FILES_DIR, id1+ext)
-        #print(FILES_DIR,id1+ext)
-
-        # Copy only once
-        if not os.path.exists(local_path):
-                shutil.copyfile(path, local_path)
-        #open file server on the root of the files by "python -m http.server 8000"
-       
-        
-        components.html(f"""
-        <script>
-           
-            // You can also open a URL in a new tab
-            window.open("http://localhost:8000/{id1+ext}", "_blank");
-        </script>
-    """, height=0, width=0)
-        #print("downloaded:"+f"http://localhost:8000/{id1+ext}")
+    return filters    

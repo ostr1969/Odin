@@ -48,6 +48,7 @@ def search():
     #     session.clear()
     ind=request.form.get("index")
     filters=get_filters(session)
+    
     res=firstsearch(filters,ind)  
     if res is not None:
         
@@ -107,7 +108,7 @@ def setyearfilter():
     return jsonify({"success": True})
 @app.route("/set_types_filter", methods=["POST"])
 def set_doc_types():
-    selected = request.form.getlist("doc_types")  # multiple values
+    selected = request.form.getlist("checkboxes")  # multiple values
     session["filters"]["type_filters"] = selected
     if len(selected)>0:
         session["filters"]["active"].append("type")
@@ -117,7 +118,7 @@ def set_doc_types():
     return jsonify({"success": True})
 @app.route("/set_lang_filter", methods=["POST"])
 def set_langs():
-    selected = request.form.getlist("langs")  # multiple values
+    selected = request.form.getlist("checkboxes")  # multiple values
     session["filters"]["language_filters"] = selected
     if len(selected)>0:
         session["filters"]["active"].append("lang")
@@ -127,7 +128,7 @@ def set_langs():
     return jsonify({"success": True})
 @app.route("/set_topics_filter", methods=["POST"])
 def set_topics():
-    selected = request.form.getlist("topics")  # multiple values
+    selected = request.form.getlist("checkboxes")  # multiple values
     session["filters"]["topic_filters"] = selected
     if len(selected)>0:
         session["filters"]["active"].append("topics")
@@ -137,7 +138,7 @@ def set_topics():
     return jsonify({"success": True})
 @app.route("/set_concepts_filter", methods=["POST"])
 def set_concepts():
-    selected = request.form.getlist("concepts")  # multiple values
+    selected = request.form.getlist("checkboxes")  # multiple values
     session["filters"]["concept_filters"] = selected
     if len(selected)>0:
         session["filters"]["active"].append("concepts")
@@ -162,20 +163,21 @@ def clear_filters():
     return jsonify({"success": True})
 @app.route("/get_agg/<aggby>")
 def get_agg(aggby):
+    #print("aggby:",aggby)
     ind=session.get("index")
     filters=get_filters(session)
     res=aggsearch(filters,ind,aggby)
     if aggby in ["type","language"]:
         aggs = res["aggregations"]["somename"]["buckets"]
-    elif aggby=="topics" :   
+    elif aggby=="topics.id" :   
         topics = res["aggregations"]["somename"]["buckets"]
         aggs=get_topics_dn(topics,index=ind)
-    elif aggby=="concepts":    
-        concepts = res["aggregations"]["concepts"]["buckets"]
+    elif aggby=="concepts.id":    
+        concepts = res["aggregations"]["somename"]["buckets"]
         aggs=get_concepts_dn(concepts,index=ind)
         
-       
-    return jsonify({"types": types})
+    #print(aggs)   
+    return jsonify({"types": aggs})
 @app.route("/session")
 def results():
     return jsonify(dict(session))
