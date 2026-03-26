@@ -1,4 +1,8 @@
-from flask import Flask, jsonify, render_template, request, redirect, session, url_for
+import os
+from pathlib import Path
+import shutil
+
+from flask import Flask, jsonify, render_template, request, redirect, send_file, session, url_for
 import config
 from utils import firstsearch,build_query,get_topics_dn,get_concepts_dn
 
@@ -56,7 +60,7 @@ def search():
     if session["filters"].get("language_filters"):
         filters.append({"field":"language","value":session["filters"].get("language_filters")}) 
     if session.get("oa_filter"):
-        filters.append({"field":"primary_location.is_oa","value":True})  
+        filters.append({"field":"primary_location.is_oa","value":session["filters"].get("oa_filter")})  
     res=firstsearch(filters,ind)  
     if res is not None:
         topics = res["aggregations"]["topics"]["buckets"]
@@ -66,6 +70,23 @@ def search():
         types = res["aggregations"]["types"]["buckets"]
         languages = res["aggregations"]["language"]["buckets"]
         total = res["hits"]["total"]["value"] 
+        results=[]
+        for rec in res['hits']['hits']:
+            r=rec['_source']
+            if r.get("type")=="book" or r.get("type")=="book-chapter":
+                icon="📚"
+            elif r.get("type")=="article":
+                icon="📄"
+            elif r.get("type")=="chapter":
+                icon="📖"
+            elif r.get("type")=="dataset":
+                icon="📦"
+            elif r.get("type")=="dissertation":
+                icon="🎓"
+            else:                icon="📁"
+            r['icon']=icon
+            
+            results.append(rec)
     return render_template(
         "search.html",
         indexes=config.INDEXES,
@@ -75,7 +96,7 @@ def search():
         field=session.get("field"),
         show_button=True,
         displayed_fields=config.DISPLAYED_FIELDS,
-        results=res["hits"]["hits"],
+        results=results,
         types=types,
         topics=topicsdn,
         concepts=conceptsdn,
@@ -100,19 +121,77 @@ def setyearfilter():
         session["filters"].pop("dchoice", None) 
     session.modified = True       
     return jsonify({"success": True})
-@app.route("/set_doc_types", methods=["POST"])
+@app.route("/set_types_filter", methods=["POST"])
 def set_doc_types():
     selected = request.form.getlist("doc_types")  # multiple values
     session["filters"]["type_filters"] = selected
     session.modified = True
     return jsonify({"success": True})
-@app.route("/results")
+@app.route("/set_lang_filter", methods=["POST"])
+def set_langs():
+    selected = request.form.getlist("langs")  # multiple values
+    session["filters"]["language_filters"] = selected
+    session.modified = True
+    return jsonify({"success": True})
+@app.route("/set_topics_filter", methods=["POST"])
+def set_topics():
+    selected = request.form.getlist("topics")  # multiple values
+    session["filters"]["topic_filters"] = selected
+    session.modified = True
+    return jsonify({"success": True})
+@app.route("/set_concepts_filter", methods=["POST"])
+def set_concepts():
+    selected = request.form.getlist("concepts")  # multiple values
+    session["filters"]["concept_filters"] = selected
+    session.modified = True
+    return jsonify({"success": True})
+@app.route("/set_oa_filter", methods=["POST"])
+def setoafilter():
+    data = request.get_json()
+    session["oa_filter"] = data.get("oa_filter") == "1"
+    session.modified = True
+    return jsonify({"success": True})
+@app.route("/clear_filters", methods=["POST"])
+def clear_filters():
+    session.pop("filters", None)   # remove key safely
+    session.modified = True
+    return jsonify({"success": True})
+@app.route("/session")
 def results():
-    return f"""
-    Query: {session.get('query')}<br>
-    Index: {session.get('index')}<br>
-    Field: {session.get('field')}
-    """
+    return jsonify(dict(session))
+@app.route("/json/<id>")
+def showjson(id):
+    index=session.get("index")
+    res=config.es.get(index=index,id=id)
+    return jsonify(res['_source'])
+@app.route("/download/<id>")
+def download(id):
+    index=session.get("index")
+    path=config.es.get(index=index,id=id)["_source"].get("path","")
+    
+   
+    path=r"/workspace/Aftabi.pdf"
+    
+    #open file server on the root of the files by "python -m http.server 8000"
+    local_url = f"http://localhost:8000/{path}"
+
+    filename = Path(path).name
+    ext = Path(path).suffix
+    
+        # --- Non-PDF: copy + load ---
+    local_path = os.path.join(config.FILES_DIR, id+ext)
+        #print(FILES_DIR,id1+ext)
+
+        # Copy only once
+    if not os.path.exists(local_path):            
+            shutil.copyfile(path, local_path)
+    
+    if ext.lower().replace(".","")  in config.OPEN_FILE_TYPES:
+        download = False
+    else:
+        download = True
+    return send_file(local_path, as_attachment=download)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

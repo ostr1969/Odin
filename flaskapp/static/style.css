@@ -49,9 +49,9 @@ select {
     align-items:baseline;
     gap: 10px; /* space between input and button */
     
-    margin: 10px auto;
+    margin: 5px auto;
     background: #f0f4f8;
-    padding: 10px 15px;
+    padding: 10px 10px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
@@ -113,3 +113,71 @@ select {
     position: sticky;
     top: 0;
   }
+ 
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #ccc;
+  border-radius: 22px;
+  transition: 0.2s;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+input:checked + .slider {
+  background-color: #4caf50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;   /* vertical alignment */
+  gap: 8px;
+  border: 1px solid #ddd;
+  padding: 6px;
+  width: fit-content;   /* shrink to content */
+  margin: 0 auto;       /* center horizontally */
+}
+
+/* all buttons same height */
+.toolbar button {
+  height: 36px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;   /* center text inside */
+  justify-content: center;
+}
+
+/* toggle + label aligned */
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+ .switch {
+  position: relative;
+  display: flex;
+  width: 40px;
+  height: 22px;
+  align-items: center;
+}
+
+.switch input {
+  display: none;
+}
+

@@ -140,7 +140,7 @@
   <div class="modal">
     <button class="close-btn" >×</button>
 
-    <form id="docForm">
+    <form id="typesForm">
      <div id="docTypesContainer">
         {% for t in types %}
           <div class="checkbox-row">
@@ -164,16 +164,16 @@
   <div class="modal">
     <button class="close-btn" >×</button>
 
-    <form id="docForm">
+    <form id="topicsForm">
      <div id="docTypesContainer">
         {% for t,v in topics.items() %}
         {%set t1=t.replace("https://openalex.org/","")%}
           <div class="checkbox-row">
             <input type="checkbox"
-                  name="doc_types"
-                  id="typ_{{ t1 }}"
+                  name="topics"
+                  id="top_{{ t1 }}"
                   value="{{ t }}">
-            <label for="typ_{{ t1 }}">
+            <label for="top_{{ t1 }}">
               {{ v[0] }} ({{ v[1] }})
             </label>
           </div>
@@ -189,16 +189,16 @@
   <div class="modal">
     <button class="close-btn" >×</button>
 
-    <form id="docForm">
+    <form id="conceptsForm">
      <div id="docTypesContainer">
         {% for t,v in concepts.items() %}
         {%set t1=t.replace("https://openalex.org/","")%}
           <div class="checkbox-row">
             <input type="checkbox"
-                  name="doc_types"
-                  id="typ_{{ t1 }}"
+                  name="concepts"
+                  id="con_{{ t1 }}"
                   value="{{ t }}">
-            <label for="typ_{{ t1 }}">
+            <label for="con_{{ t1 }}">
               {{ v[0] }} ({{ v[1] }})
             </label>
           </div>
@@ -214,16 +214,16 @@
   <div class="modal">
     <button class="close-btn" >×</button>
 
-    <form id="docForm">
+    <form id="langForm">
      <div id="docTypesContainer">
         {% for t in  languages %}
         
          <div class="checkbox-row">
             <input type="checkbox"
-                  name="doc_types"
-                  id="typ_{{ t['key'] }}"
+                  name="langs"
+                  id="lng_{{ t['key'] }}"
                   value="{{ t['key'] }}">
-            <label for="typ_{{ t['key'] }}">
+            <label for="lng_{{ t['key'] }}">
               {{ t['key'] }} ({{ t['doc_count'] }})
             </label>
           </div>
@@ -236,7 +236,7 @@
 </div>
 
 
-<div class="modal-overlay" id="yearsModal" style="display:none">
+<div id="yearsModal"  class="modal-overlay" style="display:none">
   <div class="modal">
     <button class="close-btn" onclick="closeModal()">×</button>
     <h3>Year Filter</h3>
@@ -282,7 +282,7 @@
   e.preventDefault();
 
   const formData = new FormData(e.target);
-if (e.submitter?.name) {
+  if (e.submitter?.name) {
     formData.append(e.submitter.name, e.submitter.value);
   }
   for (const [k,v] of formData.entries()) {
@@ -299,16 +299,104 @@ if (e.submitter?.name) {
   }
 };
 
+  document.getElementById("typesForm").onsubmit = async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(e.target);
+  if (e.submitter?.name) {
+    formData.append(e.submitter.name, e.submitter.value);
+  }
+  for (const [k,v] of formData.entries()) {
+    console.log(">>", k, v);
+  }
+  const res = await fetch("/set_types_filter", {
+    method: "POST",
+    body: formData
+  });
+  const data = await res.json();
+  if (data.success) {
+     const modal = e.target.closest(".modal-overlay");
+    closeModal(modal);
+  }
+};
+
+document.getElementById("langForm").onsubmit = async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(e.target);
+  if (e.submitter?.name) {
+    formData.append(e.submitter.name, e.submitter.value);
+  }
+  for (const [k,v] of formData.entries()) {
+    console.log(">>", k, v);
+  }
+  const res = await fetch("/set_lang_filter", {
+    method: "POST",
+    body: formData
+  });
+  const data = await res.json();
+  if (data.success) {
+     const modal = e.target.closest(".modal-overlay");
+    closeModal(modal);
+  }
+};
+
+document.getElementById("topicsForm").onsubmit = async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(e.target);
+  if (e.submitter?.name) {
+    formData.append(e.submitter.name, e.submitter.value);
+  }
+  for (const [k,v] of formData.entries()) {
+    console.log(">>", k, v);
+  }
+  const res = await fetch("/set_topics_filter", {
+    method: "POST",
+    body: formData
+  });
+  const data = await res.json();
+  if (data.success) {
+     const modal = e.target.closest(".modal-overlay");
+    closeModal(modal);
+  }
+};
+
+document.getElementById("conceptsForm").onsubmit = async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(e.target);
+  if (e.submitter?.name) {
+    formData.append(e.submitter.name, e.submitter.value);
+  }
+  for (const [k,v] of formData.entries()) {
+    console.log(">>", k, v);
+  }
+  const res = await fetch("/set_concepts_filter", {
+    method: "POST",
+    body: formData
+  });
+  const data = await res.json();
+  if (data.success) {
+     const modal = e.target.closest(".modal-overlay");
+    closeModal(modal);
+  }
+};
+
+
 
 
 function closeModal(modal) {
   if (!modal) return;
   modal.style.display = "none";
 }
+//any button with close-btn class find up the modal and close it 
 document.addEventListener("click", function(e) {
   if (e.target.classList.contains("close-btn")) {
     const modal = e.target.closest(".modal-overlay");
     closeModal(modal);
+    
+
   }
 });
 </script>

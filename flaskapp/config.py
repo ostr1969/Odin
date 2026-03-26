@@ -11,6 +11,7 @@ DEFAULT_SEARCH_FIELDS = ["abstract", "title"]
 SEARCH_FIELDS = ["abstract", "title", "ngrams*","countries", "countries_hist", "language","type","publication_year","open_access.is_oa","id"]
 SMALL_FIELDS = ["language", "type","open_access.is_oa"]
 
-DISPLAYED_FIELDS = ["id", "title", "language", "countries", "countries_hist", "publication_year"]
+DISPLAYED_FIELDS = ["icon","id", "title", "language", "countries", "publication_year"]
 CARD_FILTERS = ["topics"]
+OPEN_FILE_TYPES=["pdf","txt"]
 es = Elasticsearch(ELASTIC_URL)

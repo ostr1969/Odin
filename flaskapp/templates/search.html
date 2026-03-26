@@ -10,15 +10,25 @@
  <div class="box">
 {% include "_search_form.html" with context %}
 </div>
-<button class="openmodal" data-modal="yearsModal" id="yearsBtn">📅 ▾</button>
-<button class="openmodal" data-modal="typesModal" id="typesBtn">📖📑📓📕📋📝 ▾</button>
-<button class="openmodal" data-modal="topicsModal" id="topicsBtn">Topics ▾</button>
-<button class="openmodal" data-modal="conceptsModal" id="conceptsBtn">Concepts ▾</button>
-<button class="openmodal" data-modal="langModal" id="langBtn">Language ▾</button>
+<div class="toolbar">
+  <button class="openmodal" data-modal="yearsModal" id="yearsBtn">📅 ▾</button>
+  <button class="openmodal" data-modal="typesModal" id="typesBtn">📖📑📓📕📋📝 ▾</button>
+  <button class="openmodal" data-modal="topicsModal" id="topicsBtn">Topics ▾</button>
+  <button class="openmodal" data-modal="conceptsModal" id="conceptsBtn">Concepts ▾</button>
+  <button class="openmodal" data-modal="langModal" id="langBtn">Language ▾</button>
+  <div class="toggle-group">
+    <label class="switch">
+      <input type="checkbox" id="oaToggle">
+      <span class="slider"></span>
+    </label>
+    <span>Open Access</span>
+  </div>
+  <button   id="clearBtn">✗</button>
+</div>
 {% include "filter_modals.html" %}
 <!-- results placeholder -->
        <div class="card">
-          <h3>Results</h3>
+          <h3>Results({{total}})</h3>
           <table class="results-table">
             <thead>
               <tr>
@@ -40,11 +50,22 @@
                         {{ r.get(f) }}
                       </a>
                     </td>
-
+                    {% elif f == "title" %}                  
+                    <td>
+                      {%set ref=r.get('id').replace('https://openalex.org/','')%}
+                      <a href="/json/{{ ref }}" class="id-link" target="_blank" rel="noopener">
+                        {{ r.get(f) }}
+                      </a>
+                    </td>
                     {% else %}
                     <td>{{ r.get(f, "") }}</td>
                     {% endif %}
                   {% endfor %}
+                  <td>
+                    {%set ref=r.get('id').replace('https://openalex.org/','')%}
+                    <a href="/download/{{ ref }}" class="id-link" target="_blank" rel="noopener">
+                        📥
+                    </a></td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -63,17 +84,31 @@ document.addEventListener("click", function (e) {
     openModal(id);
   }
 });
-  function initModal() {
-  const yearsmodal = document.getElementById("yearsModal");
-  const typesmodal = document.getElementById("typesModal");
-  const yearsBtn = document.getElementById("yearsBtn");
-  const typesBtn = document.getElementById("typesBtn");
-  //const closeBtn = document.getElementById("closeModalBtn");
+ 
+document.getElementById("clearBtn").addEventListener("click", async () => {
+  const res = await fetch("/clear_filters", {
+    method: "POST"
+  });
 
-  //yearsBtn.onclick = () => yearsmodal.style.display = "block";
-  //typesBtn.onclick = () => typesmodal.style.display = "block";
-  //closeBtn.onclick = () => modal.style.display = "none";
-}
-initModal()
+  const data = await res.json();
+  if (data.success) {
+    // update UI as needed
+    console.log("Filters cleared");
+    // optional: reload page if UI depends on session
+    location.reload();
+  }
+});
+
+document.getElementById("oaToggle").addEventListener("change", async (e) => {
+  const value = e.target.checked ? "1" : "0";
+
+  await fetch("/set_oa_filter", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ oa_filter: value })
+  });
+});
 </script>
 </html>
