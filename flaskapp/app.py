@@ -23,8 +23,8 @@ def home():
 
 @app.route("/search", methods=["POST","GET"])
 def search():
-    redir=request.args.get("_redir")
-    redirected = redir == "1"
+    #redir=request.args.get("_redir")
+    #redirected = redir == "1"
     if "filters" not in session:        
        session["filters"] = {}
     if "active" not in  session["filters"]:  
@@ -37,15 +37,9 @@ def search():
         session['index'] = request.form.get("index",None)  # Store selected index in session
         session['query'] = request.form.get("query", "")  # Store search query in session
         session['field'] = request.form.get("field")  # Store field in session
-        #session['values'] = request.form.getlist("value[]")  # Store values in session
-        #session['years_from'] = request.form.getlist("year_from[]")  # Store year_from in session
-        #session['years_to'] = request.form.getlist("year_to[]")  # Store year_to in session
-        #session['topic_filters'] = request.form.getlist("topic[]")  # Store topic filters in session        
-        
-        return redirect(url_for('search',_redir=1))  # Redirect to GET route to display results
-    # if not redirected: #means we got here from GET but not from redirection
-    #     print("Not redirected, clearing session")
-    #     session.clear()
+       
+        return redirect(url_for('search'))  # Redirect to GET route to display results
+    
     ind=request.form.get("index")
     filters=get_filters(session)
     
@@ -149,10 +143,11 @@ def set_concepts():
 @app.route("/set_oa_filter", methods=["POST"])
 def setoafilter():
     data = request.get_json()
-    session["oa_filter"] = data.get("oa_filter") == "1"
-    if session["oa_filter"]:
+    if data.get("oa_filter") == "1":
+        session["filters"]["oa_filter"]=True
         session["filters"]["active"].append("oa")
     else:
+        session["filters"].pop("oa_filter",None)
         session["filters"]["active"].remove("oa")
     session.modified = True
     return jsonify({"success": True})

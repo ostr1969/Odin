@@ -176,6 +176,7 @@ def get_filters(session):
         filters.append({"field":"concepts.id","value":session["filters"].get("concept_filters")})             
     if session["filters"].get("language_filters"):
         filters.append({"field":"language","value":session["filters"].get("language_filters")}) 
-    if session.get("oa_filter"):
-        filters.append({"field":"primary_location.is_oa","value":session["filters"].get("oa_filter")}) 
+    if session["filters"].get("oa_filter"):
+        filters.append({"field":"primary_location.is_oa","value":True}) 
+    #print(filters)    
     return filters    

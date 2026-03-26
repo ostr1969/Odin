@@ -75,6 +75,8 @@
 </body>
 <script>
   const active = JSON.parse('{{ active | tojson | safe }}');
+  document.getElementById("oaToggle").checked = active.includes("oa");
+  console.log(active);
   function openModal(id) {
   const modal = document.getElementById(id);
   if (modal) modal.style.display = "block";
@@ -117,6 +119,8 @@ document.getElementById("oaToggle").addEventListener("change", async (e) => {
     },
     body: JSON.stringify({ oa_filter: value })
   });
+  location.reload();
 });
+
 </script>
 </html>
