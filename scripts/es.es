@@ -54,7 +54,7 @@ get works3/_search?filter_path=*.*.*.title,*.*.*.publ*
 {
     "query": {
         "query_string": {
-            "query": "Poucher"s Perfumes, Cosmetics and Soaps",
+            "query": "Pouchers Perfumes, Cosmetics and Soaps",
             "fields": [
                 "title"
             ],
@@ -64,13 +64,44 @@ get works3/_search?filter_path=*.*.*.title,*.*.*.publ*
     }
 }
 
-get libgen/_search?filter_path=*.*.*.Title,*.*.*.publ*
+get works3/_search?filter_path=*
 {
     "query": {
-        "match": {
-            "Title": "magnetic"
+        "bool": {
+            "must": [
+                {
+                    "query_string": {
+                        "query": "Training strategies",
+                        "fields": [
+                            "abstract",
+                            "title"
+                        ]
+                    }
+                }
+            ]
         }
-    }
+    },
+    "size": 100,
+    "track_total_hits": true,
+    "aggs":{
+               
+                    "topics": {
+                        "terms": {
+                            "field": "topics.id",
+                            "size": 10
+                            }
+                    
+                }, 
+                     "concepts": {
+                        "terms": {
+                            "field": "concepts.id",
+                            "size": 10
+                            }
+                    
+                }, 
+                    "types":{ "terms": { "field": "type", "size": 10 }},
+                    "language":{ "terms": { "field": "language", "size": 5 }}
+            }
 }
 
 POST libgen/_update/874611_d5c5af05d51c83da3a4cb833d5e830f7

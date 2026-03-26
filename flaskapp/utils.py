@@ -61,7 +61,7 @@ def build_query(filters):
 
     for f in filters:
         field = f["field"]
-
+        print(field)
         if field == "abstract+title":
             must.append({
                 "query_string": {
@@ -120,6 +120,7 @@ def build_query(filters):
 def firstsearch(filters,ind):
     
     q=build_query(filters)
+    print(q)
     res = es.search(
             index=ind,
             track_total_hits=True,
@@ -149,7 +150,51 @@ def firstsearch(filters,ind):
     #print(res["hits"]["total"]["value"])
     return res
 
+def aggsearch(filters,ind,aggby):
+    
+    q=build_query(filters)
+    
+    res = es.search(
+            index=ind,            
+            query=q,
+            size=0,
+            #topics:topics.id
+            #concepts:concepts.id
+            #types:type
+            #language:language
+            aggregations={
+               
+                    "somename": {
+                        "terms": {
+                            "field": aggby,
+                            "size": 10
+                            }
+                    
+                }
+            }
+        )
+    #print(res["hits"]["total"]["value"])
+    return res
 
+def get_filters(session):
+    filters=[{"field":session["field"],"value":session["query"]}]
+    if session["filters"].get("dchoice") == "0":
+        filters.append({"field":"publication_year","from":2025,"to":3000})
+    elif session["filters"].get("dchoice") == "1":
+        filters.append({"field":"publication_year","from":2020,"to":3000})
+    elif session["filters"].get("dchoice") == "custom":       
+        filters.append({"field":"publication_year","from":session["filters"].get("from_year"),
+                        "to":session["filters"].get("to_year")})
+    if session["filters"].get("type_filters"):
+        filters.append({"field":"type","value":session["filters"].get("type_filters")}) 
+    if session["filters"].get("topic_filters"):
+        filters.append({"field":"topics.id","value":session["filters"].get("topic_filters")}) 
+    if session["filters"].get("concept_filters"):
+        filters.append({"field":"concepts.id","value":session["filters"].get("concept_filters")})             
+    if session["filters"].get("language_filters"):
+        filters.append({"field":"language","value":session["filters"].get("language_filters")}) 
+    if session.get("oa_filter"):
+        filters.append({"field":"primary_location.is_oa","value":session["filters"].get("oa_filter")}) 
 def download(id1,ind):
         
         

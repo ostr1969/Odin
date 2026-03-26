@@ -8,7 +8,7 @@ INDEXES = ["works3", "authors3"]
 FILES_DIR = "files"  # local folder inside your app
 
 DEFAULT_SEARCH_FIELDS = ["abstract", "title"]
-SEARCH_FIELDS = ["abstract", "title", "ngrams*","countries", "countries_hist", "language","type","publication_year","open_access.is_oa","id"]
+SEARCH_FIELDS = ["title","abstract+title","abstract+title+content" , "ngrams*","countries", "countries_hist", "language","type","publication_year","open_access.is_oa","id"]
 SMALL_FIELDS = ["language", "type","open_access.is_oa"]
 
 DISPLAYED_FIELDS = ["icon","id", "title", "language", "countries", "publication_year"]

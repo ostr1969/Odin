@@ -4,7 +4,7 @@ import shutil
 
 from flask import Flask, jsonify, render_template, request, redirect, send_file, session, url_for
 import config
-from utils import firstsearch,build_query,get_topics_dn,get_concepts_dn
+from utils import firstsearch,build_query,get_topics_dn,get_concepts_dn,aggsearch,get_filters
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # required for session
@@ -47,32 +47,10 @@ def search():
     #     print("Not redirected, clearing session")
     #     session.clear()
     ind=request.form.get("index")
-    filters=[{"field":session["field"],"value":session["query"]}]
-    if session["filters"].get("dchoice") == "0":
-        filters.append({"field":"publication_year","from":2025,"to":3000})
-    elif session["filters"].get("dchoice") == "1":
-        filters.append({"field":"publication_year","from":2020,"to":3000})
-    elif session["filters"].get("dchoice") == "custom":       
-        filters.append({"field":"publication_year","from":session["filters"].get("from_year"),
-                        "to":session["filters"].get("to_year")})
-    if session["filters"].get("type_filters"):
-        filters.append({"field":"type","value":session["filters"].get("type_filters")}) 
-    if session["filters"].get("topic_filters"):
-        filters.append({"field":"topics.id","value":session["filters"].get("topic_filters")}) 
-    if session["filters"].get("concept_filters"):
-        filters.append({"field":"concepts.id","value":session["filters"].get("concept_filters")})             
-    if session["filters"].get("language_filters"):
-        filters.append({"field":"language","value":session["filters"].get("language_filters")}) 
-    if session.get("oa_filter"):
-        filters.append({"field":"primary_location.is_oa","value":session["filters"].get("oa_filter")})  
+    filters=get_filters(session)
     res=firstsearch(filters,ind)  
     if res is not None:
-        topics = res["aggregations"]["topics"]["buckets"]
-        topicsdn=get_topics_dn(topics,index=ind)
-        concepts = res["aggregations"]["concepts"]["buckets"]
-        conceptsdn=get_concepts_dn(concepts,index=ind)
-        types = res["aggregations"]["types"]["buckets"]
-        languages = res["aggregations"]["language"]["buckets"]
+        
         total = res["hits"]["total"]["value"] 
         results=[]
         for rec in res['hits']['hits']:
@@ -100,10 +78,7 @@ def search():
         show_button=True,
         displayed_fields=config.DISPLAYED_FIELDS,
         results=results,
-        types=types,
-        topics=topicsdn,
-        concepts=conceptsdn,
-        languages=languages,
+       
         total=total,
         active=session["filters"]["active"]
     )
@@ -185,6 +160,22 @@ def clear_filters():
     session.pop("filters", None)   # remove key safely
     session.modified = True
     return jsonify({"success": True})
+@app.route("/get_agg/<aggby>")
+def get_agg(aggby):
+    ind=session.get("index")
+    filters=get_filters(session)
+    res=aggsearch(filters,ind,aggby)
+    if aggby in ["type","language"]:
+        aggs = res["aggregations"]["somename"]["buckets"]
+    elif aggby=="topics" :   
+        topics = res["aggregations"]["somename"]["buckets"]
+        aggs=get_topics_dn(topics,index=ind)
+    elif aggby=="concepts":    
+        concepts = res["aggregations"]["concepts"]["buckets"]
+        aggs=get_concepts_dn(concepts,index=ind)
+        
+       
+    return jsonify({"types": types})
 @app.route("/session")
 def results():
     return jsonify(dict(session))
