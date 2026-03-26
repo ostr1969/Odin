@@ -85,16 +85,18 @@ def setyearfilter():
     
     if opt=="2025":
         session["filters"]["dchoice"]="0"
-        
-        session["filters"]["active"].append("year")
+        if "year" not in session["filters"]["active"]:
+            session["filters"]["active"].append("year")
     elif opt=="2020":    
         session["filters"]["dchoice"]="1"
-        session["filters"]["active"].append("year")
+        if "year" not in session["filters"]["active"]:
+            session["filters"]["active"].append("year")
     elif opt=="2":
         session["filters"]["dchoice"]="custom"
         session["filters"]["from"]=request.form.get("year_from")
         session["filters"]["to"]=request.form.get("year_to")
-        session["filters"]["active"].append("year")
+        if "year" not in session["filters"]["active"]:
+            session["filters"]["active"].append("year")
     else :
         session["filters"].pop("dchoice", None) 
         session["filters"]["active"].remove("year")
