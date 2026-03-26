@@ -180,4 +180,9 @@ input:checked + .slider:before {
 .switch input {
   display: none;
 }
+.openmodal.active {
+  background-color: #ddd;
+  border: 1px solid #888;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
 

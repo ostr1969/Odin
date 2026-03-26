@@ -27,6 +27,10 @@ def search():
     redirected = redir == "1"
     if "filters" not in session:        
        session["filters"] = {}
+    if "active" not in  session["filters"]:  
+       session["filters"]["active"]=[]
+       
+      
 
     
     if request.method == "POST":
@@ -85,7 +89,6 @@ def search():
                 icon="🎓"
             else:                icon="📁"
             r['icon']=icon
-            
             results.append(rec)
     return render_template(
         "search.html",
@@ -101,7 +104,8 @@ def search():
         topics=topicsdn,
         concepts=conceptsdn,
         languages=languages,
-        total=total
+        total=total,
+        active=session["filters"]["active"]
     )
 
 @app.route("/set_year_filter",methods=["POST"])
@@ -111,44 +115,69 @@ def setyearfilter():
     
     if opt=="2025":
         session["filters"]["dchoice"]="0"
+        
+        session["filters"]["active"].append("year")
     elif opt=="2020":    
         session["filters"]["dchoice"]="1"
+        session["filters"]["active"].append("year")
     elif opt=="2":
         session["filters"]["dchoice"]="custom"
         session["filters"]["from"]=request.form.get("year_from")
         session["filters"]["to"]=request.form.get("year_to")
+        session["filters"]["active"].append("year")
     else :
         session["filters"].pop("dchoice", None) 
+        session["filters"]["active"].remove("year")
     session.modified = True       
     return jsonify({"success": True})
 @app.route("/set_types_filter", methods=["POST"])
 def set_doc_types():
     selected = request.form.getlist("doc_types")  # multiple values
     session["filters"]["type_filters"] = selected
+    if len(selected)>0:
+        session["filters"]["active"].append("type")
+    else:
+        session["filters"]["active"].remove("type")
     session.modified = True
     return jsonify({"success": True})
 @app.route("/set_lang_filter", methods=["POST"])
 def set_langs():
     selected = request.form.getlist("langs")  # multiple values
     session["filters"]["language_filters"] = selected
+    if len(selected)>0:
+        session["filters"]["active"].append("lang")
+    else:
+        session["filters"]["active"].remove("lang")
     session.modified = True
     return jsonify({"success": True})
 @app.route("/set_topics_filter", methods=["POST"])
 def set_topics():
     selected = request.form.getlist("topics")  # multiple values
     session["filters"]["topic_filters"] = selected
+    if len(selected)>0:
+        session["filters"]["active"].append("topics")
+    else:
+        session["filters"]["active"].remove("topics")
     session.modified = True
     return jsonify({"success": True})
 @app.route("/set_concepts_filter", methods=["POST"])
 def set_concepts():
     selected = request.form.getlist("concepts")  # multiple values
     session["filters"]["concept_filters"] = selected
+    if len(selected)>0:
+        session["filters"]["active"].append("concepts")
+    else:
+        session["filters"]["active"].remove("concepts")
     session.modified = True
     return jsonify({"success": True})
 @app.route("/set_oa_filter", methods=["POST"])
 def setoafilter():
     data = request.get_json()
     session["oa_filter"] = data.get("oa_filter") == "1"
+    if session["oa_filter"]:
+        session["filters"]["active"].append("oa")
+    else:
+        session["filters"]["active"].remove("oa")
     session.modified = True
     return jsonify({"success": True})
 @app.route("/clear_filters", methods=["POST"])
